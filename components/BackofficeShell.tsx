@@ -36,7 +36,7 @@ export function BackofficeShell({ role, userName, groups, children }: Props) {
       {open && (
         <div
           onClick={() => setOpen(false)}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.5)", zIndex: 70 }}
+          className="bo-sidebar-overlay"
         />
       )}
       <aside className={`bo-sidebar${open ? " is-open" : ""}`}>
