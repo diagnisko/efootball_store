@@ -26,7 +26,7 @@ export default function PrivacyPage() {
         <h3>2. Finalité</h3>
         <p>Vérification d&apos;identité, traitement des paiements, prévention de la fraude, support client.</p>
         <h3>3. Conservation</h3>
-        <p>Les documents sensibles sont stockés dans un espace de stockage privé, non accessible publiquement, et consultés uniquement par le personnel autorisé (journalisé, voir le journal d&apos;audit admin).</p>
+        <p>Les documents sensibles sont stockés dans un espace de stockage privé, non accessible publiquement. Ils peuvent être consultés uniquement par des membres autorisés pour traiter une vérification ou prévenir une fraude, avec une URL temporaire et une consultation journalisée dans le journal d&apos;audit admin. Ils ne sont pas partagés avec les autres utilisateurs.</p>
         <h3>4. Droits</h3>
         <p>Vous pouvez demander l&apos;accès, la correction ou la suppression de vos données en contactant le support.</p>
       </div>

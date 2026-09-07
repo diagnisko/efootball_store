@@ -233,6 +233,13 @@ td.mono{font-family:'JetBrains Mono';}
 .settings-hint{font-size:11px; color:var(--muted-2); margin-top:var(--sp-2);}
 .settings-error{color:var(--neon); font-size:13px; margin-bottom:var(--sp-3);}
 .settings-success{color:var(--ok); font-size:13px;}
+.verification-privacy-note{
+  display:flex; flex-direction:column; gap:5px; margin:0 0 24px; padding:12px 14px;
+  color:var(--muted); font-size:11px; line-height:1.5;
+  background:rgba(34,211,238,.055); border:1px solid rgba(34,211,238,.2);
+  border-left:3px solid var(--cyan);
+}
+.verification-privacy-note strong{ color:var(--ivory); font-size:12px; }
 .pw-field{position:relative;}
 .pw-field input{padding-right:60px;}
 .pw-toggle{position:absolute; right:12px; top:13px; font-size:11px; color:var(--muted-2); cursor:pointer; user-select:none;}

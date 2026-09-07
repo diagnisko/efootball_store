@@ -125,6 +125,14 @@ export default function VerificationPage() {
           <>
             <div className="auth-title">Vérification d&apos;identité</div>
             <div className="auth-sub">Pour accéder aux achats, votre identité doit être vérifiée.</div>
+            <div className="verification-privacy-note" role="note">
+              <strong>Vos documents restent confidentiels.</strong>
+              <span>
+                Ils sont stockés dans un espace privé et ne sont accessibles qu&apos;aux membres
+                autorisés de VANTA pour vérifier votre dossier. Ils ne sont pas publiés ni partagés
+                avec d&apos;autres utilisateurs.
+              </span>
+            </div>
 
             <div className="u-mb-4">
               <label className="settings-label">Type de document</label>
