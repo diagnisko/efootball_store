@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, getSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { PasswordField } from "@/components/PasswordField";
 
@@ -11,40 +10,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const res = await signIn("credentials", { email, password, redirect: false });
-    if (res?.error === "TOO_MANY_ATTEMPTS") {
-      setLoading(false);
-      setError("Trop de tentatives échouées. Réessayez dans 15 minutes ou réinitialisez votre mot de passe.");
-      return;
-    }
-    if (res?.error) {
-      setLoading(false);
-      setError("Email ou mot de passe incorrect.");
-      return;
-    }
-
-    // Redirection intelligente selon le rôle (section 6.14 du cahier des charges) : un
-    // Manager/Super Admin ne doit jamais atterrir sur le dashboard client après connexion.
-    let session = await getSession();
-    for (let attempt = 0; !session && attempt < 3; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 150));
-      session = await getSession();
-    }
-    const role = (session?.user as { role?: string } | undefined)?.role;
-    setLoading(false);
-    const destination = role === "SUPER_ADMIN"
-      ? "/admin/dashboard"
-      : role === "MANAGER"
-        ? "/manager/verifications"
-        : "/dashboard";
-    router.replace(destination);
-    router.refresh();
+    await signIn("credentials", {
+      email: email.trim().toLowerCase(),
+      password,
+      redirect: true,
+      callbackUrl: "/post-login",
+    });
   }
 
   return (

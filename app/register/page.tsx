@@ -38,19 +38,12 @@ export default function RegisterPage() {
       return;
     }
 
-    const signInRes = await signIn("credentials", {
+    await signIn("credentials", {
       email: email.trim().toLowerCase(),
       password,
-      redirect: false,
+      redirect: true,
+      callbackUrl: "/post-login",
     });
-    setLoading(false);
-    if (signInRes?.error) {
-      setError("Compte créé, mais la connexion automatique a échoué. Connectez-vous avec vos identifiants.");
-      router.replace("/login");
-      return;
-    }
-    router.replace("/dashboard");
-    router.refresh();
   }
 
   return (
