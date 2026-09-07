@@ -133,6 +133,32 @@ export async function uploadProductMedia(fileName: string, contentType: string, 
   return { key, publicUrl: publicUrlFor(key), mediaType: isVideo ? "VIDEO" : "IMAGE" as const };
 }
 
+export async function uploadAvatar(userId: string, fileName: string, contentType: string, body: Uint8Array) {
+  if (!PUBLIC_BUCKET) throw new StorageNotConfiguredError();
+  if (!IMAGE_TYPES.includes(contentType)) {
+    throw new Error("Type de fichier non autorisé (images JPEG/PNG/WEBP/GIF uniquement).");
+  }
+  const maxBytes = 4 * 1024 * 1024;
+  if (body.byteLength > maxBytes) throw new Error("Fichier trop volumineux (maximum 4 Mo).");
+  const key = `avatars/${userId}/${safeKeySegment(fileName)}`;
+  const client = getClient();
+  await client.send(new PutObjectCommand({ Bucket: PUBLIC_BUCKET, Key: key, Body: body, ContentType: contentType }));
+  return { key, publicUrl: publicUrlFor(key) };
+}
+
+export async function uploadIdentityDocument(userId: string, fileName: string, contentType: string, body: Uint8Array) {
+  if (!PRIVATE_BUCKET) throw new StorageNotConfiguredError();
+  if (!DOCUMENT_TYPES.includes(contentType)) {
+    throw new Error("Type de fichier non autorisé (images JPEG/PNG/WEBP ou PDF uniquement).");
+  }
+  const maxBytes = 4 * 1024 * 1024;
+  if (body.byteLength > maxBytes) throw new Error("Fichier trop volumineux (maximum 4 Mo sur Vercel).");
+  const key = `identity/${userId}/${safeKeySegment(fileName)}`;
+  const client = getClient();
+  await client.send(new PutObjectCommand({ Bucket: PRIVATE_BUCKET, Key: key, Body: body, ContentType: contentType }));
+  return { key };
+}
+
 /**
  * Régénère une URL de consultation temporaire (5 min par défaut) pour un objet du bucket
  * privé. Chaque appel doit être précédé d'une vérification de permission côté appelant, et

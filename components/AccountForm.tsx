@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { uploadFileViaPresignedPost } from "@/lib/uploadFile";
 import { useToast } from "@/components/Toast";
 
 interface Props {
@@ -42,7 +41,11 @@ export function AccountForm(props: Props) {
     setUploading(true);
     setError(null);
     try {
-      const result = await uploadFileViaPresignedPost("/api/uploads/avatar", file);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/uploads/avatar", { method: "POST", body: formData });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Échec de l'upload.");
       setAvatarUrl(result.publicUrl ?? null);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Échec de l'upload.";

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { uploadFileViaPresignedPost } from "@/lib/uploadFile";
 
 const STEP_LABELS = ["Bienvenue", "Profil", "Vérification", "Dossier"];
 
@@ -31,7 +30,11 @@ export default function VerificationPage() {
     setUploading(true);
     setUploadError(null);
     try {
-      const result = await uploadFileViaPresignedPost("/api/uploads/identity-document", file);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/uploads/identity-document", { method: "POST", body: formData });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Échec de l'upload.");
       setDocumentKey(result.key);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Échec de l'upload.");
