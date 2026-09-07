@@ -1,0 +1,495 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ======================= ENUMS =======================
+
+enum RoleName {
+  CLIENT
+  MANAGER
+  SUPER_ADMIN
+}
+
+enum VerificationStatus {
+  NOT_SUBMITTED
+  PROFILE_INCOMPLETE
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
+
+enum AuthProvider {
+  CREDENTIALS
+  GOOGLE
+  APPLE
+}
+
+enum DocumentType {
+  NATIONAL_ID
+  PASSPORT
+  OTHER
+}
+
+enum DocumentSide {
+  FRONT
+  BACK
+  SINGLE
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ProductStatus {
+  AVAILABLE
+  IN_PROGRESS
+  SOLD
+  HIDDEN
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  THUMBNAIL
+}
+
+enum PurchaseStatus {
+  AWAITING_DEPOSIT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum DepositStatus {
+  PENDING
+  AWAITING_VALIDATION
+  PAID
+  REJECTED
+}
+
+enum PlanStatus {
+  PENDING_DEPOSIT
+  ACTIVE
+  COMPLETED
+  DEFAULTED
+  CANCELLED
+}
+
+enum ScheduleStatus {
+  UPCOMING
+  DUE
+  AWAITING_VALIDATION
+  PAID
+  LATE
+  PENALIZED
+}
+
+enum SubmissionStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  INFO_REQUESTED
+}
+
+enum ConfirmationDecision {
+  CONFIRMED
+  REJECTED
+  INFO_REQUESTED
+}
+
+enum PenaltyType {
+  FIXED
+  PERCENTAGE
+}
+
+enum ConversationStatus {
+  OPEN
+  ARCHIVED
+  RESOLVED
+}
+
+enum VerificationCodeStatus {
+  PENDING
+  PROVIDED
+  CANCELLED
+}
+
+// ======================= CORE =======================
+
+model Role {
+  id          String   @id @default(uuid())
+  name        RoleName @unique
+  description String?
+  users       User[]
+}
+
+model User {
+  id                  String              @id @default(uuid())
+  firstName           String
+  lastName            String
+  email               String              @unique
+  phone               String?
+  passwordHash        String?
+  country             String?
+  address             String?
+  roleId              String
+  role                Role                @relation(fields: [roleId], references: [id])
+  verificationStatus  VerificationStatus  @default(NOT_SUBMITTED)
+  accountStatus       AccountStatus       @default(ACTIVE)
+  authProvider        AuthProvider        @default(CREDENTIALS)
+  providerAccountId   String?
+  avatarUrl           String?
+  onboardingCompleted Boolean             @default(false)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  managerPermissions     ManagerPermission[] @relation("PermissionsOfUser")
+  grantedPermissions     ManagerPermission[] @relation("PermissionsGrantedBy")
+  identityDocuments      IdentityDocument[]  @relation("DocumentsOfUser")
+  reviewedDocuments      IdentityDocument[]  @relation("DocumentsReviewedBy")
+  verificationRequests   VerificationRequest[] @relation("VerificationOfUser")
+  reviewedVerifications  VerificationRequest[] @relation("VerificationReviewedBy")
+  createdProducts        Product[]
+  purchases              Purchase[]
+  paymentSubmissions     PaymentSubmission[]
+  paymentConfirmations   PaymentConfirmation[]
+  accessInfoCreated      AccessInformation[]
+  conversationsAsClient  Conversation[]      @relation("ConversationClient")
+  conversationsAssigned  Conversation[]      @relation("ConversationAssignee")
+  messages               Message[]
+  notifications          Notification[]
+  adminLogs              AdminLog[]
+  updatedLateRules       LatePaymentRule[]
+  updatedSettings        PlatformSetting[]
+  passwordResetTokens    PasswordResetToken[]
+  clientNotesReceived    ClientNote[]        @relation("ClientNotesOfClient")
+  clientNotesAuthored    ClientNote[]        @relation("ClientNotesByAuthor")
+
+  verificationCodeRequests VerificationCodeRequest[] @relation("VerificationCodeRequester")
+  verificationCodesProvided VerificationCodeRequest[] @relation("VerificationCodeProvider")
+
+  @@index([email])
+  @@index([verificationStatus])
+}
+
+model ManagerPermission {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation("PermissionsOfUser", fields: [userId], references: [id])
+  capability String
+  granted    Boolean  @default(false)
+  grantedBy  String?
+  grantedByUser User? @relation("PermissionsGrantedBy", fields: [grantedBy], references: [id])
+  grantedAt  DateTime @default(now())
+
+  @@unique([userId, capability])
+}
+
+// ======================= VERIFICATION =======================
+
+model IdentityDocument {
+  id               String         @id @default(uuid())
+  userId           String
+  user             User           @relation("DocumentsOfUser", fields: [userId], references: [id])
+  documentType     DocumentType
+  side             DocumentSide
+  fileUrl          String
+  uploadedAt       DateTime       @default(now())
+  status           DocumentStatus @default(PENDING)
+  reviewedBy       String?
+  reviewer         User?          @relation("DocumentsReviewedBy", fields: [reviewedBy], references: [id])
+  reviewedAt       DateTime?
+  rejectionReason  String?
+}
+
+model VerificationRequest {
+  id              String              @id @default(uuid())
+  userId          String
+  user            User                @relation("VerificationOfUser", fields: [userId], references: [id])
+  status          SubmissionStatus    @default(PENDING)
+  submittedAt     DateTime            @default(now())
+  reviewedBy      String?
+  reviewer        User?               @relation("VerificationReviewedBy", fields: [reviewedBy], references: [id])
+  reviewedAt      DateTime?
+  rejectionReason String?
+  internalNote    String?
+}
+
+// ======================= PRODUCTS =======================
+
+model Product {
+  id                    String          @id @default(uuid())
+  title                 String
+  slug                  String          @unique
+  description           String
+  features              Json?
+  priceTotal            Decimal         @db.Decimal(12, 2)
+  initialDepositAmount  Decimal         @db.Decimal(12, 2)
+  installmentsCount     Int             @default(8)
+  status                ProductStatus   @default(AVAILABLE)
+  featured              Boolean         @default(false)
+  importantInfo         String?
+  createdBy             String
+  creator               User            @relation(fields: [createdBy], references: [id])
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  media     ProductMedia[]
+  purchases Purchase[]
+
+  @@index([status])
+}
+
+model ProductMedia {
+  id        String    @id @default(uuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id])
+  mediaType MediaType
+  url       String
+  position  Int       @default(0)
+  isMain    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+}
+
+// ======================= PURCHASES & PAYMENTS =======================
+
+model Purchase {
+  id         String         @id @default(uuid())
+  userId     String
+  user       User           @relation(fields: [userId], references: [id])
+  productId  String
+  product    Product        @relation(fields: [productId], references: [id])
+  status     PurchaseStatus @default(AWAITING_DEPOSIT)
+  totalPrice Decimal        @db.Decimal(12, 2)
+  createdAt  DateTime       @default(now())
+
+  paymentPlan       PaymentPlan?
+  accessInformation AccessInformation[]
+  verificationCodeRequests VerificationCodeRequest[]
+
+  @@index([userId])
+  @@index([productId])
+}
+
+model PaymentPlan {
+  id                    String     @id @default(uuid())
+  purchaseId            String     @unique
+  purchase              Purchase   @relation(fields: [purchaseId], references: [id])
+  initialDepositAmount  Decimal    @db.Decimal(12, 2)
+  initialDepositStatus  DepositStatus @default(PENDING)
+  remainingAmount       Decimal    @db.Decimal(12, 2)
+  installmentsCount     Int        @default(8)
+  startDate             DateTime?
+  status                PlanStatus @default(PENDING_DEPOSIT)
+  createdAt              DateTime  @default(now())
+
+  schedules  PaymentSchedule[]
+  submissions PaymentSubmission[] @relation("DepositSubmissions")
+}
+
+model PaymentSchedule {
+  id                String         @id @default(uuid())
+  paymentPlanId     String
+  paymentPlan       PaymentPlan    @relation(fields: [paymentPlanId], references: [id])
+  installmentNumber Int
+  dueDate           DateTime
+  amount            Decimal        @db.Decimal(12, 2)
+  status            ScheduleStatus @default(UPCOMING)
+  paidAt            DateTime?
+  daysLate          Int            @default(0)
+  penaltyAmount     Decimal        @default(0) @db.Decimal(12, 2)
+
+  submissions PaymentSubmission[]
+
+  @@unique([paymentPlanId, installmentNumber])
+  @@index([status])
+}
+
+model PaymentSubmission {
+  id                 String            @id @default(uuid())
+  paymentScheduleId  String?
+  paymentSchedule    PaymentSchedule?  @relation(fields: [paymentScheduleId], references: [id])
+  paymentPlanId      String?
+  paymentPlan        PaymentPlan?      @relation("DepositSubmissions", fields: [paymentPlanId], references: [id])
+  userId             String
+  user               User              @relation(fields: [userId], references: [id])
+  reference          String?
+  proofUrl           String?
+  comment            String?
+  submittedAt        DateTime          @default(now())
+  status             SubmissionStatus  @default(PENDING)
+
+  confirmation PaymentConfirmation?
+}
+
+model PaymentConfirmation {
+  id                    String               @id @default(uuid())
+  paymentSubmissionId   String               @unique
+  paymentSubmission     PaymentSubmission    @relation(fields: [paymentSubmissionId], references: [id])
+  reviewedBy            String
+  reviewer              User                 @relation(fields: [reviewedBy], references: [id])
+  decision              ConfirmationDecision
+  note                  String?
+  reviewedAt            DateTime             @default(now())
+}
+
+model LatePaymentRule {
+  id                              String      @id @default(uuid())
+  gracePeriodDays                 Int         @default(3)
+  penaltyType                     PenaltyType @default(PERCENTAGE)
+  penaltyValue                    Decimal     @db.Decimal(10, 2)
+  maxLateDaysBeforeSuspension     Int         @default(15)
+  maxLateDaysBeforeCancellation   Int         @default(45)
+  updatedBy                       String?
+  updater                         User?       @relation(fields: [updatedBy], references: [id])
+  updatedAt                       DateTime    @updatedAt
+}
+
+// ======================= ACCESS / MESSAGING / NOTIFS =======================
+
+model AccessInformation {
+  id                String    @id @default(uuid())
+  purchaseId        String
+  purchase          Purchase  @relation(fields: [purchaseId], references: [id])
+  title             String
+  content           String
+  visibleToClient   Boolean   @default(false)
+  createdBy         String
+  creator           User      @relation(fields: [createdBy], references: [id])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  releasedAt        DateTime?
+}
+
+/// Le compte eFootball transféré au client déclenche presque toujours une demande de code
+/// de vérification (2FA/OTP) de Konami au premier login depuis un nouvel appareil — code
+/// reçu sur l'email/téléphone resté associé au compte, donc géré par le manager/admin qui
+/// a accès à ces identifiants. Le client demande un code depuis son espace ; un
+/// manager/admin le renseigne dès qu'il le reçoit. Voir /api/verification-codes/*.
+model VerificationCodeRequest {
+  id          String                  @id @default(uuid())
+  purchaseId  String
+  purchase    Purchase                @relation(fields: [purchaseId], references: [id])
+  requestedBy String
+  requester   User                    @relation("VerificationCodeRequester", fields: [requestedBy], references: [id])
+  status      VerificationCodeStatus  @default(PENDING)
+  code        String?
+  note        String?
+  providedBy  String?
+  provider    User?                   @relation("VerificationCodeProvider", fields: [providedBy], references: [id])
+  createdAt   DateTime                @default(now())
+  respondedAt DateTime?
+
+  @@index([status])
+  @@index([purchaseId])
+}
+
+model Conversation {
+  id             String              @id @default(uuid())
+  clientId       String
+  client         User                @relation("ConversationClient", fields: [clientId], references: [id])
+  status         ConversationStatus  @default(OPEN)
+  assignedTo     String?
+  assignee       User?               @relation("ConversationAssignee", fields: [assignedTo], references: [id])
+  lastMessageAt  DateTime            @default(now())
+  createdAt      DateTime            @default(now())
+
+  messages Message[]
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  content        String
+  attachmentUrl  String?
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+model AdminLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  actor      User     @relation(fields: [actorId], references: [id])
+  actorRole  String
+  action     String
+  targetType String
+  targetId   String
+  oldValue   Json?
+  newValue   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([targetType, targetId])
+}
+
+model PlatformSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     Json
+  updatedBy String?
+  updater   User?    @relation(fields: [updatedBy], references: [id])
+  updatedAt DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model LoginAttempt {
+  id        String   @id @default(uuid())
+  email     String
+  success   Boolean
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+}
+
+model ClientNote {
+  id        String   @id @default(uuid())
+  clientId  String
+  client    User     @relation("ClientNotesOfClient", fields: [clientId], references: [id])
+  authorId  String
+  author    User     @relation("ClientNotesByAuthor", fields: [authorId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
+}
