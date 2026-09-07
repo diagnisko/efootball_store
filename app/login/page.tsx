@@ -31,12 +31,19 @@ export default function LoginPage() {
 
     // Redirection intelligente selon le rôle (section 6.14 du cahier des charges) : un
     // Manager/Super Admin ne doit jamais atterrir sur le dashboard client après connexion.
-    const session = await getSession();
+    let session = await getSession();
+    for (let attempt = 0; !session && attempt < 3; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      session = await getSession();
+    }
     const role = (session?.user as { role?: string } | undefined)?.role;
     setLoading(false);
-    if (role === "SUPER_ADMIN") router.push("/admin/dashboard");
-    else if (role === "MANAGER") router.push("/manager/verifications");
-    else router.push("/dashboard");
+    const destination = role === "SUPER_ADMIN"
+      ? "/admin/dashboard"
+      : role === "MANAGER"
+        ? "/manager/verifications"
+        : "/dashboard";
+    router.replace(destination);
     router.refresh();
   }
 

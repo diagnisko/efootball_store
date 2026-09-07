@@ -53,7 +53,11 @@ export function ProductForm({ initial }: { initial?: InitialData }) {
   async function handleFileUpload(i: number, file: File) {
     setUploadingIndex(i);
     try {
-      const result = await uploadFileViaPresignedPost("/api/uploads/product-media", file);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/uploads/product-media", { method: "POST", body: formData });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Échec de l'upload.");
       updateMedia(i, {
         url: result.publicUrl ?? "",
         mediaType: result.mediaType ?? "IMAGE",

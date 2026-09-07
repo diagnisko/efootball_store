@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { randomUUID } from "crypto";
@@ -114,6 +114,23 @@ export async function createProductMediaUploadPost(fileName: string, contentType
   });
 
   return { url, fields, key, publicUrl: publicUrlFor(key), mediaType: isVideo ? "VIDEO" : "IMAGE" as const };
+}
+
+export async function uploadProductMedia(fileName: string, contentType: string, body: Uint8Array) {
+  if (!PUBLIC_BUCKET) throw new StorageNotConfiguredError();
+  const isImage = IMAGE_TYPES.includes(contentType);
+  const isVideo = VIDEO_TYPES.includes(contentType);
+  if (!isImage && !isVideo) {
+    throw new Error("Type de fichier non autorisé (images JPEG/PNG/WEBP/GIF ou vidéos MP4/WEBM uniquement).");
+  }
+  const maxBytes = isVideo ? MAX_MEDIA_VIDEO_BYTES : MAX_MEDIA_IMAGE_BYTES;
+  if (body.byteLength > maxBytes) {
+    throw new Error(`Fichier trop volumineux (maximum ${isVideo ? "100 Mo" : "8 Mo"}).`);
+  }
+  const key = `products/${safeKeySegment(fileName)}`;
+  const client = getClient();
+  await client.send(new PutObjectCommand({ Bucket: PUBLIC_BUCKET, Key: key, Body: body, ContentType: contentType }));
+  return { key, publicUrl: publicUrlFor(key), mediaType: isVideo ? "VIDEO" : "IMAGE" as const };
 }
 
 /**
