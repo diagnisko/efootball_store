@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -87,6 +88,8 @@ export async function POST(req: Request) {
     targetId: product.id,
     newValue: { title: product.title, status: product.status },
   });
+
+  revalidateTag("public-catalog");
 
   return NextResponse.json({ id: product.id, slug: product.slug }, { status: 201 });
 }

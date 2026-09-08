@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { PasswordField } from "@/components/PasswordField";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,12 +16,20 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    await signIn("credentials", {
+    const result = await signIn("credentials", {
       email: email.trim().toLowerCase(),
       password,
-      redirect: true,
+      redirect: false,
       callbackUrl: "/post-login",
     });
+    setLoading(false);
+    if (!result || result.error) {
+      setError(result?.error === "TOO_MANY_ATTEMPTS"
+        ? "Trop de tentatives. Réessayez dans quelques minutes."
+        : "Email ou mot de passe incorrect.");
+      return;
+    }
+    router.push(result.url ?? "/post-login");
   }
 
   return (

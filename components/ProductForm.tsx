@@ -182,11 +182,11 @@ export function ProductForm({ initial }: { initial?: InitialData }) {
           <input style={inputStyle} value={data.platform} onChange={(e) => update("platform", e.target.value)} />
         </div>
         <div>
-          <label style={labelStyle}>OVR</label>
+          <label style={labelStyle}>Puissance</label>
           <input type="number" style={inputStyle} value={data.ovr ?? ""} onChange={(e) => update("ovr", Number(e.target.value))} />
         </div>
         <div>
-          <label style={labelStyle}>Coins</label>
+          <label style={labelStyle}>Pièces</label>
           <input type="number" style={inputStyle} value={data.coins ?? ""} onChange={(e) => update("coins", Number(e.target.value))} />
         </div>
         <div>

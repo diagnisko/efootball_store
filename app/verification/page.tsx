@@ -12,6 +12,7 @@ export default function VerificationPage() {
 
   const [phone, setPhone] = useState("");
   const [country, setCountry] = useState("");
+  const [locationConsent, setLocationConsent] = useState(false);
   const [documentType, setDocumentType] = useState<"NATIONAL_ID" | "PASSPORT" | "OTHER">("NATIONAL_ID");
   const [documentKey, setDocumentKey] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -50,7 +51,7 @@ export default function VerificationPage() {
     const res = await fetch("/api/verification/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, country, documentType, documentKey: documentKey ?? undefined }),
+      body: JSON.stringify({ phone, country, documentType, documentKey: documentKey ?? undefined, locationConsent }),
     });
     setLoading(false);
     if (!res.ok) {
@@ -134,6 +135,15 @@ export default function VerificationPage() {
               </span>
             </div>
 
+            <label className="verification-consent">
+              <input
+                type="checkbox"
+                checked={locationConsent}
+                onChange={(e) => setLocationConsent(e.target.checked)}
+              />
+              <span>J&apos;accepte de partager ma localisation avec VANTA pour sécuriser la remise de l&apos;article. Cette autorisation est enregistrée avec mon dossier.</span>
+            </label>
+
             <div className="u-mb-4">
               <label className="settings-label">Type de document</label>
               <select
@@ -167,7 +177,7 @@ export default function VerificationPage() {
 
             <div style={{ display: "flex", gap: 12 }}>
               <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setStep(2)} disabled={loading}>Retour</button>
-              <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSubmit} disabled={loading}>
+              <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSubmit} disabled={loading || !locationConsent || !documentKey}>
                 {loading ? "Envoi..." : "Soumettre pour vérification"}
               </button>
             </div>

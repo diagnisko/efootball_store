@@ -1,11 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { LateRulesForm } from "@/components/LateRulesForm";
 import { RunLateJobButton } from "@/components/RunLateJobButton";
+import { HeroImageSettings } from "@/components/HeroImageSettings";
+import { getHomepageHeroImageCached } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
-  const rule = await prisma.latePaymentRule.findFirst();
+  const [rule, heroImageUrl] = await Promise.all([
+    prisma.latePaymentRule.findFirst(),
+    getHomepageHeroImageCached(),
+  ]);
 
   return (
     <div>
@@ -29,6 +34,14 @@ export default async function AdminSettingsPage() {
             maxLateDaysBeforeCancellation: rule?.maxLateDaysBeforeCancellation ?? 45,
           }}
         />
+      </div>
+
+      <div className="bo-section" style={{ marginBottom: 20 }}>
+        <div className="bo-section-head"><h3>Image de couverture de l&apos;accueil</h3></div>
+        <p style={{ fontSize: 13, color: "var(--bo-muted)", marginBottom: 16 }}>
+          Cette image est indépendante des offres du catalogue. Elle peut être remplacée à tout moment par le Super Admin.
+        </p>
+        <HeroImageSettings initialUrl={heroImageUrl} />
       </div>
 
       <div className="bo-section">

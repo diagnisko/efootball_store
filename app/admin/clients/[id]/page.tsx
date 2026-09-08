@@ -19,6 +19,7 @@ export default async function AdminClientDetailPage({ params }: { params: { id: 
     where: { id: params.id },
     include: {
       role: true,
+      identityDocuments: { orderBy: { uploadedAt: "desc" } },
       verificationRequests: { orderBy: { submittedAt: "desc" }, take: 5 },
       purchases: { include: { product: true }, orderBy: { createdAt: "desc" } },
       clientNotesReceived: { include: { author: true }, orderBy: { createdAt: "desc" } },
@@ -66,6 +67,29 @@ export default async function AdminClientDetailPage({ params }: { params: { id: 
             <div className="bo-kv-row"><span className="k">Montant réglé (achats terminés)</span><span className="v">{totalPaid.toLocaleString("fr-FR")} FCFA</span></div>
           </div>
         </div>
+      </div>
+
+      <div className="bo-panel bo-panel-pad bo-table-wrap" style={{ marginBottom: 20 }}>
+        <h3>Pièces d&apos;identité</h3>
+        {client.identityDocuments.length === 0 && <div className="bo-empty">Aucune pièce téléversée.</div>}
+        {client.identityDocuments.length > 0 && (
+          <table>
+            <thead><tr><th>Type</th><th>Face</th><th>Téléversé le</th><th>Statut</th><th>Document</th></tr></thead>
+            <tbody>
+              {client.identityDocuments.map((doc) => (
+                <tr key={doc.id}>
+                  <td>{doc.documentType === "NATIONAL_ID" ? "Carte d&apos;identité" : doc.documentType === "PASSPORT" ? "Passeport" : "Autre document"}</td>
+                  <td>{doc.side === "FRONT" ? "Recto" : doc.side === "BACK" ? "Verso" : "—"}</td>
+                  <td className="mono">{new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(doc.uploadedAt)}</td>
+                  <td>{doc.status}</td>
+                  <td>
+                    <a href={`/api/admin/documents/${doc.id}`} target="_blank" rel="noreferrer" className="link-arrow">Ouvrir</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
 
       <div className="bo-panel bo-panel-pad bo-table-wrap" style={{ marginBottom: 20 }}>

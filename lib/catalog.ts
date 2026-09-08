@@ -12,7 +12,6 @@ export const getPublicCatalogCached = unstable_cache(
     return prisma.product.findMany({
       where: { status: { in: ["AVAILABLE", "IN_PROGRESS", "SOLD"] } },
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-      take: 6,
       include: {
         media: {
           orderBy: [{ isMain: "desc" }, { position: "asc" }],
@@ -22,5 +21,5 @@ export const getPublicCatalogCached = unstable_cache(
     });
   },
   ["public-catalog"],
-  { revalidate: 30 }
+  { revalidate: 30, tags: ["public-catalog"] }
 );

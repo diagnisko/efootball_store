@@ -146,6 +146,8 @@ model User {
   passwordHash        String?
   country             String?
   address             String?
+  locationConsent     Boolean             @default(false)
+  locationConsentAt   DateTime?
   roleId              String
   role                Role                @relation(fields: [roleId], references: [id])
   verificationStatus  VerificationStatus  @default(NOT_SUBMITTED)

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { signOut } from "next-auth/react";
 import { ConfirmProvider } from "@/components/ConfirmDialog";
 import { IconMenu } from "@/components/Icons";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export interface BoNavItem {
   href: string;
@@ -87,6 +88,7 @@ export function BackofficeShell({ role, userName, groups, children }: Props) {
             </div>
           </div>
           <div className="bo-topbar-user">
+            <NotificationBell />
             Connecté en tant que <b>{userName}</b>
           </div>
         </div>

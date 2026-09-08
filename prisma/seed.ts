@@ -89,7 +89,7 @@ async function main() {
       where: { slug: "compte-prime-ovr-134" },
       update: {},
       create: {
-        title: "Compte Prime OVR 134",
+        title: "Compte Prime Puissance 134",
         slug: "compte-prime-ovr-134",
         description: "5 icônes dont Zidane et Ronaldinho, effectif complet.",
         features: { platform: "Mobile", ovr: 134, coins: 1200000, division: 1 },
@@ -104,7 +104,7 @@ async function main() {
       where: { slug: "compte-elite-ovr-131" },
       update: {},
       create: {
-        title: "Compte Elite OVR 131",
+        title: "Compte Elite Puissance 131",
         slug: "compte-elite-ovr-131",
         description: "3 icônes, effectif Epic complet.",
         features: { platform: "Mobile", ovr: 131, coins: 640000, division: 2 },
@@ -118,7 +118,7 @@ async function main() {
       where: { slug: "compte-legends-ovr-126" },
       update: {},
       create: {
-        title: "Compte Legends OVR 126",
+        title: "Compte Legends Puissance 126",
         slug: "compte-legends-ovr-126",
         description: "2 icônes, base solide pour progression.",
         features: { platform: "Mobile", ovr: 126, coins: 340000, division: 3 },
@@ -132,7 +132,7 @@ async function main() {
       where: { slug: "compte-champion-ovr-129" },
       update: {},
       create: {
-        title: "Compte Champion OVR 129",
+        title: "Compte Champion Puissance 129",
         slug: "compte-champion-ovr-129",
         description: "4 icônes, effectif Champion complet.",
         features: { platform: "Mobile", ovr: 129, coins: 520000, division: 2 },

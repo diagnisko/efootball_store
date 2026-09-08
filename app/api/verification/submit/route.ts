@@ -14,15 +14,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Votre identité est déjà vérifiée." }, { status: 400 });
   }
 
-  const { phone, country, documentType, documentKey } = (await req.json().catch(() => ({}))) as {
+  const { phone, country, documentType, documentKey, locationConsent } = (await req.json().catch(() => ({}))) as {
     phone?: string;
     country?: string;
     documentType?: "NATIONAL_ID" | "PASSPORT" | "OTHER";
     documentKey?: string;
+    locationConsent?: boolean;
   };
 
   if (!phone || !country || !documentType) {
     return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
+  }
+  if (locationConsent !== true) {
+    return NextResponse.json({ error: "Votre accord pour le partage de votre localisation est requis." }, { status: 400 });
   }
 
   const existingPending = await prisma.verificationRequest.findFirst({
@@ -35,7 +39,7 @@ export async function POST(req: Request) {
   await prisma.$transaction([
     prisma.user.update({
       where: { id: userId },
-      data: { phone, country, verificationStatus: "PENDING" },
+      data: { phone, country, verificationStatus: "PENDING", locationConsent: true, locationConsentAt: new Date() },
     }),
     // fileUrl contient la clé S3 (bucket privé) renvoyée par /api/uploads/identity-document —
     // jamais une URL publique. Si aucun fichier n'a été réellement téléversé (ex: stockage

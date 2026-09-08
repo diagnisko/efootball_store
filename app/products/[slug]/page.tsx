@@ -48,7 +48,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             />
           </div>
           <div className="product-title-row">
-            <h1>{product.title}</h1>
+            <h1>{product.title.replace(/\bOVR\b/gi, "Puissance")}</h1>
             <span className={`badge ${status.className}`}>{status.label}</span>
           </div>
           <p style={{ color: "var(--muted)", lineHeight: 1.7, marginBottom: 24 }}>{product.description}</p>
@@ -57,8 +57,8 @@ export default async function ProductPage({ params }: { params: { slug: string }
             <h3>Caractéristiques</h3>
             <div className="grid-2" style={{ fontSize: 14 }}>
               <div><span style={{ color: "var(--muted-2)" }}>Plateforme</span><br />{features.platform ?? "Mobile"}</div>
-              {features.ovr && <div><span style={{ color: "var(--muted-2)" }}>OVR</span><br />{features.ovr}</div>}
-              {features.coins && <div><span style={{ color: "var(--muted-2)" }}>Coins</span><br />{features.coins.toLocaleString("fr-FR")}</div>}
+              {features.ovr && <div><span style={{ color: "var(--muted-2)" }}>Puissance</span><br />{features.ovr}</div>}
+              {features.coins && <div><span style={{ color: "var(--muted-2)" }}>Pièces</span><br />{features.coins.toLocaleString("fr-FR")}</div>}
               {features.division && <div><span style={{ color: "var(--muted-2)" }}>Division</span><br />{features.division}</div>}
             </div>
           </div>
@@ -77,6 +77,14 @@ export default async function ProductPage({ params }: { params: { slug: string }
             {Number(product.priceTotal).toLocaleString("fr-FR")} FCFA
           </div>
           <div style={{ fontSize: 12, color: "var(--muted-2)", marginBottom: 20 }}>Prix total</div>
+
+          <div className="wave-payment-card">
+            <span className="wave-payment-logo">W</span>
+            <div>
+              <strong>Paiement par Wave</strong>
+              <span>Envoyez l&apos;apport au <b>+221 78 133 23 23</b></span>
+            </div>
+          </div>
 
           <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 2, marginBottom: 24 }}>
             <div style={{ display: "flex", justifyContent: "space-between" }}>
