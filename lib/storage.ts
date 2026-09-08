@@ -171,6 +171,27 @@ export async function presignPrivateDownload(key: string, expiresInSeconds = 300
   return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }
 
+/** Retourne une URL lisible par le navigateur, y compris lorsque le bucket public est privé. */
+export async function getProductMediaDownloadUrl(sourceUrl: string, expiresInSeconds = 3600): Promise<string> {
+  if (!PUBLIC_BUCKET || !REGION || !ACCESS_KEY || !SECRET_KEY) return sourceUrl;
+
+  let parsed: URL;
+  try {
+    parsed = new URL(sourceUrl);
+  } catch {
+    return sourceUrl;
+  }
+
+  const publicBaseHost = PUBLIC_BASE_URL ? new URL(PUBLIC_BASE_URL).host : null;
+  const bucketHost = `${PUBLIC_BUCKET}.s3.${REGION}.amazonaws.com`;
+  if (parsed.host !== publicBaseHost && parsed.host !== bucketHost) return sourceUrl;
+
+  const key = decodeURIComponent(parsed.pathname.replace(/^\//, ""));
+  if (!key) return sourceUrl;
+  const client = getClient();
+  return getSignedUrl(client, new GetObjectCommand({ Bucket: PUBLIC_BUCKET, Key: key }), { expiresIn: expiresInSeconds });
+}
+
 /**
  * Génère un formulaire d'upload présigné pour la photo de profil d'un utilisateur (bucket
  * PUBLIC — c'est une donnée non sensible). Contrairement aux médias produits, aucune

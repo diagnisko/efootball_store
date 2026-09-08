@@ -23,6 +23,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
 
   const session = await getServerSession(authOptions);
   const userId = (session?.user as { id?: string } | undefined)?.id;
+  const role = (session?.user as { role?: string } | undefined)?.role;
   const verificationStatus = (session?.user as { verificationStatus?: string } | undefined)?.verificationStatus;
 
   const myPurchase = userId
@@ -44,7 +45,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
         <div>
           <div style={{ marginBottom: 24 }}>
             <ProductGallery
-              media={product.media.map((m) => ({ id: m.id, url: m.url, mediaType: m.mediaType }))}
+              media={product.media.map((m) => ({ id: m.id, url: `/api/products/media/${m.id}`, mediaType: m.mediaType }))}
             />
           </div>
           <div className="product-title-row">
@@ -112,6 +113,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             initialDepositAmount={Number(product.initialDepositAmount)}
             installmentsCount={product.installmentsCount}
             isAuthenticated={!!session?.user}
+            isStaff={role === "SUPER_ADMIN" || role === "MANAGER"}
             verificationStatus={verificationStatus}
             myPurchase={
               myPurchase

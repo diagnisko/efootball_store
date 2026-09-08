@@ -12,6 +12,7 @@ interface Props {
   initialDepositAmount: number;
   installmentsCount: number;
   isAuthenticated: boolean;
+  isStaff: boolean;
   verificationStatus?: string;
   myPurchase: { id: string; status: string; depositStatus?: string } | null;
 }
@@ -23,6 +24,7 @@ export function PurchaseButton({
   initialDepositAmount,
   installmentsCount,
   isAuthenticated,
+  isStaff,
   verificationStatus,
   myPurchase,
 }: Props) {
@@ -41,6 +43,10 @@ export function PurchaseButton({
         Se connecter pour acheter
       </Link>
     );
+  }
+
+  if (isStaff) {
+    return <button className="btn btn-ghost btn-block" disabled>Achat réservé aux clients</button>;
   }
 
   // -------- Non vérifié --------

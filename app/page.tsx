@@ -42,7 +42,7 @@ export default async function LandingPage() {
               return (
                 <article key={p.id} className="landing-product-card">
                   <div className="landing-card-thumb">
-                    {p.media[0]?.url && <img src={p.media[0].url} alt={p.title} />}
+                    {p.media[0]?.url && <img src={`/api/products/media/${p.media[0].id}`} alt={p.title} />}
                     <span className={`badge ${status.className}`}>{status.label}</span>
                   </div>
 
@@ -173,7 +173,7 @@ export default async function LandingPage() {
             return (
               <article key={p.id} className="landing-product-card">
                 <div className="landing-card-thumb">
-                  {p.media[0]?.url && <img src={p.media[0].url} alt={p.title} />}
+                  {p.media[0]?.url && <img src={`/api/products/media/${p.media[0].id}`} alt={p.title} />}
                   <span className={`badge ${status.className}`}>{status.label}</span>
                 </div>
 

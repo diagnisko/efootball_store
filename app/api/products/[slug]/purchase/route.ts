@@ -8,6 +8,10 @@ export async function POST(_req: Request, { params }: { params: { slug: string }
   if (!session?.user) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
 
   const userId = (session.user as { id: string }).id;
+  const role = (session.user as { role?: string }).role;
+  if (role === "SUPER_ADMIN" || role === "MANAGER") {
+    return NextResponse.json({ error: "Les comptes administrateurs ne peuvent pas acheter une offre." }, { status: 403 });
+  }
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return NextResponse.json({ error: "Utilisateur introuvable." }, { status: 404 });
