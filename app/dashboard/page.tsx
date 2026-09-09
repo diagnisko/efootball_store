@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { DeclarePaymentButton } from "@/components/DeclarePaymentButton";
 import { DeclareDepositButton } from "@/components/DeclareDepositButton";
+import { DeclareMultiplePaymentsButton } from "@/components/DeclareMultiplePaymentsButton";
 import { RequestVerificationCodeButton } from "@/components/RequestVerificationCodeButton";
 import { IconArrowRight } from "@/components/Icons";
 
@@ -122,9 +123,9 @@ export default async function DashboardPage() {
             </div>
           </div>
           <p className="u-muted u-mb-4">
-            Votre réservation est enregistrée. Déclarez votre apport initial de{" "}
+            Votre réservation est enregistrée. Déclarez votre {purchase.paymentPlan?.paymentMode === "ONE_TIME" ? "paiement comptant" : "apport initial"} de{" "}
             {purchase.paymentPlan ? Number(purchase.paymentPlan.initialDepositAmount).toLocaleString("fr-FR") : "—"}{" "}
-            FCFA pour activer votre plan de paiement sur {purchase.paymentPlan?.installmentsCount ?? 8} mois.
+            FCFA{purchase.paymentPlan?.paymentMode === "ONE_TIME" ? " pour finaliser votre achat." : ` pour activer votre plan de paiement sur ${purchase.paymentPlan?.installmentsCount ?? 8} mois.`}
           </p>
           {purchase.paymentPlan && (
             <DeclareDepositButton
@@ -193,6 +194,15 @@ export default async function DashboardPage() {
               </div>
             </div>
           )}
+
+          <DeclareMultiplePaymentsButton
+            schedules={schedules.map((schedule) => ({
+              id: schedule.id,
+              installmentNumber: schedule.installmentNumber,
+              amount: Number(schedule.amount),
+              status: schedule.status,
+            }))}
+          />
 
           <div className="panel card u-mb-5">
             <h3>Mes échéances</h3>

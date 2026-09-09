@@ -7,7 +7,7 @@ import { IconArrowRight } from "@/components/Icons";
 import { getHomepageHeroImageCached } from "@/lib/site-settings";
 
 const STATUS_LABEL: Record<string, { label: string; className: string }> = {
-  AVAILABLE: { label: "Sélection", className: "badge-ok" },
+  AVAILABLE: { label: "Disponible", className: "badge-ok" },
   IN_PROGRESS: { label: "En cours", className: "badge-warn" },
   SOLD: { label: "Vendu", className: "badge-muted" },
   HIDDEN: { label: "Masqué", className: "badge-muted" },
@@ -144,7 +144,7 @@ export default async function LandingPage() {
         </div>
         <div className="stat-item">
           <span>Offres disponibles</span>
-          <strong>{products.length}</strong>
+          <strong>{products.filter((product) => product.status === "AVAILABLE").length}</strong>
         </div>
       </section>
 

@@ -14,8 +14,10 @@ interface Props {
   isAuthenticated: boolean;
   isStaff: boolean;
   verificationStatus?: string;
-  myPurchase: { id: string; status: string; depositStatus?: string } | null;
+  myPurchase: { id: string; status: string; depositStatus?: string; paymentMode?: "MONTHLY" | "ONE_TIME" } | null;
 }
+
+type PaymentMode = "MONTHLY" | "ONE_TIME";
 
 export function PurchaseButton({
   productSlug,
@@ -29,6 +31,7 @@ export function PurchaseButton({
   myPurchase,
 }: Props) {
   const [step, setStep] = useState<"idle" | "confirm" | "deposit">("idle");
+  const [paymentMode, setPaymentMode] = useState<PaymentMode>("MONTHLY");
   const [reference, setReference] = useState("");
   const [comment, setComment] = useState("");
   const [proofKey, setProofKey] = useState<string | null>(null);
@@ -69,9 +72,9 @@ export function PurchaseButton({
           {step === "deposit" && (
             <div className="modal-bg show" onClick={() => !loading && setStep("idle")}>
               <div className="panel modal" onClick={(e) => e.stopPropagation()}>
-                <h3>Déclarer votre apport initial</h3>
+                <h3>{myPurchase.paymentMode === "ONE_TIME" ? "Déclarer votre paiement comptant" : "Déclarer votre apport initial"}</h3>
                 <p className="hint">
-                  {initialDepositAmount.toLocaleString("fr-FR")} FCFA. Ajoutez une référence si
+                  {(myPurchase.paymentMode === "ONE_TIME" ? priceTotal : initialDepositAmount).toLocaleString("fr-FR")} FCFA. Ajoutez une référence si
                   disponible.
                 </p>
                 <input
@@ -136,6 +139,7 @@ export function PurchaseButton({
   // -------- Disponible : lancer l'achat --------
   const remaining = priceTotal - initialDepositAmount;
   const monthly = Math.round(remaining / installmentsCount);
+  const oneTime = paymentMode === "ONE_TIME";
 
   return (
     <>
@@ -146,12 +150,26 @@ export function PurchaseButton({
         <div className="modal-bg show" onClick={() => !loading && setStep("idle")}>
           <div className="panel modal" onClick={(e) => e.stopPropagation()}>
             <h3>Conditions financières</h3>
+            <div className="modal-actions" style={{ marginBottom: 16 }}>
+              <button className={`btn ${!oneTime ? "btn-primary" : "btn-ghost"}`} onClick={() => setPaymentMode("MONTHLY")} type="button">
+                Paiement mensuel
+              </button>
+              <button className={`btn ${oneTime ? "btn-primary" : "btn-ghost"}`} onClick={() => setPaymentMode("ONE_TIME")} type="button">
+                Payer en une fois
+              </button>
+            </div>
             <div style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.8, marginBottom: 20 }}>
               <div>Prix total : <strong style={{ color: "#fff" }}>{priceTotal.toLocaleString("fr-FR")} FCFA</strong></div>
-              <div>Apport initial : <strong style={{ color: "#fff" }}>{initialDepositAmount.toLocaleString("fr-FR")} FCFA</strong></div>
-              <div>Montant restant : <strong style={{ color: "#fff" }}>{remaining.toLocaleString("fr-FR")} FCFA</strong></div>
-              <div>Durée : <strong style={{ color: "#fff" }}>{installmentsCount} mois</strong></div>
-              <div>Mensualité estimée : <strong style={{ color: "#fff" }}>{monthly.toLocaleString("fr-FR")} FCFA</strong></div>
+              {oneTime ? (
+                <div>Montant à payer : <strong style={{ color: "#fff" }}>{priceTotal.toLocaleString("fr-FR")} FCFA</strong></div>
+              ) : (
+                <>
+                  <div>Apport initial : <strong style={{ color: "#fff" }}>{initialDepositAmount.toLocaleString("fr-FR")} FCFA</strong></div>
+                  <div>Montant restant : <strong style={{ color: "#fff" }}>{remaining.toLocaleString("fr-FR")} FCFA</strong></div>
+                  <div>Durée : <strong style={{ color: "#fff" }}>{installmentsCount} mois</strong></div>
+                  <div>Mensualité estimée : <strong style={{ color: "#fff" }}>{monthly.toLocaleString("fr-FR")} FCFA</strong></div>
+                </>
+              )}
             </div>
             {error && <p style={{ color: "var(--neon)", fontSize: 12, marginBottom: 10 }}>{error}</p>}
             <div className="modal-actions">
@@ -164,7 +182,11 @@ export function PurchaseButton({
                   setLoading(true);
                   setError(null);
                   try {
-                    const res = await fetch(`/api/products/${productSlug}/purchase`, { method: "POST" });
+                    const res = await fetch(`/api/products/${productSlug}/purchase`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ paymentMode }),
+                    });
                     if (!res.ok) throw new Error((await res.json()).error);
                     router.refresh();
                     setStep("idle");

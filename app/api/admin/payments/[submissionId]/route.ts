@@ -6,6 +6,7 @@ import { requireCapability } from "@/lib/permissions";
 import { logAdminAction } from "@/lib/admin-log";
 import type { Prisma } from "@prisma/client";
 import { sendEmail } from "@/lib/email";
+import { revalidateTag } from "next/cache";
 import {
   depositConfirmedEmail,
   depositRejectedEmail,
@@ -86,32 +87,40 @@ export async function PATCH(req: Request, { params }: { params: { submissionId: 
 
     if (decision === "confirm") {
       const startDate = new Date();
-      const monthlyAmount = Number(plan.remainingAmount) / plan.installmentsCount;
 
       ops.push(
         prisma.paymentPlan.update({
           where: { id: plan.id },
-          data: { initialDepositStatus: "PAID", status: "ACTIVE", startDate },
+          data: {
+            initialDepositStatus: "PAID",
+            status: plan.paymentMode === "ONE_TIME" ? "COMPLETED" : "ACTIVE",
+            startDate,
+          },
         }),
-        prisma.purchase.update({ where: { id: purchase.id }, data: { status: "ACTIVE" } }),
-        prisma.product.update({ where: { id: purchase.productId }, data: { status: "IN_PROGRESS" } })
+        prisma.purchase.update({ where: { id: purchase.id }, data: { status: plan.paymentMode === "ONE_TIME" ? "COMPLETED" : "ACTIVE" } }),
+        prisma.product.update({ where: { id: purchase.productId }, data: { status: plan.paymentMode === "ONE_TIME" ? "SOLD" : "IN_PROGRESS" } })
       );
 
-      for (let i = 1; i <= plan.installmentsCount; i++) {
-        ops.push(
-          prisma.paymentSchedule.create({
-            data: {
-              paymentPlanId: plan.id,
-              installmentNumber: i,
-              dueDate: addMonths(startDate, i),
-              amount: monthlyAmount,
-              status: i === 1 ? "DUE" : "UPCOMING",
-            },
-          })
-        );
+      if (plan.paymentMode === "MONTHLY") {
+        const monthlyAmount = Number(plan.remainingAmount) / plan.installmentsCount;
+        for (let i = 1; i <= plan.installmentsCount; i++) {
+          ops.push(
+            prisma.paymentSchedule.create({
+              data: {
+                paymentPlanId: plan.id,
+                installmentNumber: i,
+                dueDate: addMonths(startDate, i),
+                amount: monthlyAmount,
+                status: i === 1 ? "DUE" : "UPCOMING",
+              },
+            })
+          );
+        }
       }
       notifTitle = "Apport initial validé";
-      notifBody = "Votre apport initial a été confirmé. Votre plan de paiement sur 8 mois est maintenant actif.";
+      notifBody = plan.paymentMode === "ONE_TIME"
+        ? "Votre paiement comptant a été confirmé. Votre achat est maintenant finalisé."
+        : `Votre apport initial a été confirmé. Votre plan de paiement sur ${plan.installmentsCount} mois est maintenant actif.`;
     } else if (decision === "reject") {
       ops.push(
         prisma.paymentPlan.update({ where: { id: plan.id }, data: { initialDepositStatus: "REJECTED" } })
@@ -195,6 +204,7 @@ export async function PATCH(req: Request, { params }: { params: { submissionId: 
   );
 
   await prisma.$transaction(ops);
+  revalidateTag("public-catalog");
 
   await logAdminAction({
     actorId,

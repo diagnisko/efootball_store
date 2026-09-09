@@ -107,7 +107,7 @@ export function AccountForm(props: Props) {
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <div
             className="avatar-circle"
-            style={avatarUrl ? { background: `url(${avatarUrl}) center/cover` } : undefined}
+            style={avatarUrl ? { background: `url("${avatarUrl}") center/cover` } : undefined}
           >
             {!avatarUrl && initial}
           </div>

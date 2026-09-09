@@ -29,7 +29,7 @@ export function AccountMenu({ name, email, avatarUrl }: Props) {
         onClick={() => setOpen((v) => !v)}
         style={{
           width: 40, height: 40, borderRadius: "50%", border: "1px solid var(--glass-border)",
-          background: avatarUrl ? `url(${avatarUrl}) center/cover` : "linear-gradient(135deg,var(--volt),var(--cyan))",
+          background: avatarUrl ? `url("${avatarUrl}") center/cover` : "linear-gradient(135deg,var(--volt),var(--cyan))",
           display: "flex", alignItems: "center", justifyContent: "center",
           color: "#fff", fontWeight: 700, fontSize: 15, cursor: "pointer",
         }}
