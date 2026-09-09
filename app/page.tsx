@@ -59,10 +59,11 @@ export default async function LandingPage() {
                       <span className="landing-label">À partir de</span>
                       <strong>{Number(p.priceTotal).toLocaleString("fr-FR")} FCFA</strong>
                     </div>
-                    <Link href={`/products/${p.slug}`} className="landing-link">
-                      Consulter l&apos;offre <IconArrowRight />
-                    </Link>
                   </div>
+
+                  <Link href={`/products/${p.slug}`} className="landing-buy-btn">
+                    Consulter l&apos;offre <IconArrowRight />
+                  </Link>
                 </article>
               );
             })}
