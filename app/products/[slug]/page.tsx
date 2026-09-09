@@ -80,7 +80,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
           <div style={{ fontSize: 12, color: "var(--muted-2)", marginBottom: 20 }}>Mensuel par défaut, paiement comptant disponible</div>
 
           <div className="wave-payment-card">
-            <span className="wave-payment-logo">W</span>
+            <img className="wave-payment-logo" src="/wave-logo.svg" alt="Wave" />
             <div>
               <strong>Paiement par Wave</strong>
               <span>Envoyez l&apos;apport au <b>+221 78 308 70 95</b></span>

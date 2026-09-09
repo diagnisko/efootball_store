@@ -7,6 +7,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AccountMenu } from "@/components/AccountMenu";
 import { MobileNavToggle } from "@/components/MobileNavToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { unstable_cache } from "next/cache";
 
 export const metadata: Metadata = {
@@ -64,6 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {role === "SUPER_ADMIN" && <Link href="/admin/dashboard">Admin</Link>}
             </div>
             <div className="nav-cta">
+              <ThemeToggle />
               {currentUser ? (
                 <>
                   <Link href="/messages" className="btn btn-ghost">Messages</Link>
