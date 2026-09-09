@@ -45,42 +45,47 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Une demande est déjà en cours de traitement." }, { status: 400 });
   }
 
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: userId },
-      data: { phone, country, verificationStatus: "PENDING", locationConsent: true, locationConsentAt: new Date() },
-    }),
-    prisma.identityDocument.create({
-      data: {
-        userId,
-        documentType,
-        side: "FRONT",
-        fileUrl: frontKey,
-        status: "PENDING",
-      },
-    }),
-    prisma.identityDocument.create({
-      data: {
-        userId,
-        documentType,
-        side: "BACK",
-        fileUrl: backKey,
-        status: "PENDING",
-      },
-    }),
-    prisma.identityDocument.create({
-      data: {
-        userId,
-        documentType: "FACE_PHOTO",
-        side: "SINGLE",
-        fileUrl: facePhotoKey,
-        status: "PENDING",
-      },
-    }),
-    prisma.verificationRequest.create({
-      data: { userId, status: "PENDING" },
-    }),
-  ]);
+  try {
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: userId },
+        data: { phone, country, verificationStatus: "PENDING", locationConsent: true, locationConsentAt: new Date() },
+      }),
+      prisma.identityDocument.create({
+        data: {
+          userId,
+          documentType,
+          side: "FRONT",
+          fileUrl: frontKey,
+          status: "PENDING",
+        },
+      }),
+      prisma.identityDocument.create({
+        data: {
+          userId,
+          documentType,
+          side: "BACK",
+          fileUrl: backKey,
+          status: "PENDING",
+        },
+      }),
+      prisma.identityDocument.create({
+        data: {
+          userId,
+          documentType: "FACE_PHOTO",
+          side: "SINGLE",
+          fileUrl: facePhotoKey,
+          status: "PENDING",
+        },
+      }),
+      prisma.verificationRequest.create({
+        data: { userId, status: "PENDING" },
+      }),
+    ]);
+  } catch (error) {
+    console.error("Verification submission failed", { userId, error });
+    return NextResponse.json({ error: "Impossible d'enregistrer votre dossier. La base de données doit appliquer la migration de vérification." }, { status: 500 });
+  }
 
   const reviewers = await prisma.user.findMany({
     where: { role: { name: { in: ["SUPER_ADMIN", "MANAGER"] } } },

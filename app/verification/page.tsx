@@ -188,7 +188,7 @@ export default function VerificationPage() {
 
             <div className="u-mb-5">
               <label className="settings-label">Photo claire de votre visage</label>
-              <input type="file" accept="image/*" capture="user" onChange={(e) => handleFileChange(e, "face")} disabled={uploading} className="u-muted" />
+              <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, "face")} disabled={uploading} className="u-muted" />
               {facePhotoKey && !uploading && <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Photo envoyée et prête à être soumise.</p>}
             </div>
 
