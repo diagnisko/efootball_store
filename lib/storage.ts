@@ -33,6 +33,8 @@ const MAX_MEDIA_IMAGE_BYTES = 8 * 1024 * 1024; // 8 Mo
 const MAX_MEDIA_VIDEO_BYTES = 100 * 1024 * 1024; // 100 Mo
 const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024; // 10 Mo
 
+export type IdentityUploadSlot = "front" | "back" | "face";
+
 function safeKeySegment(fileName: string): string {
   const ext = fileName.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
   return `${randomUUID()}.${ext}`;
@@ -68,8 +70,16 @@ async function createPrivateUploadPost(prefix: string, fileName: string, content
  * (voir IdentityDocument.fileUrl) et une URL de consultation est régénérée à la demande,
  * de courte durée, uniquement pour un utilisateur autorisé (section 26 du cahier des charges).
  */
-export async function createIdentityDocumentUploadPost(userId: string, fileName: string, contentType: string) {
-  return createPrivateUploadPost(`identity/${userId}`, fileName, contentType, MAX_DOCUMENT_BYTES);
+export async function createIdentityDocumentUploadPost(
+  userId: string,
+  fileName: string,
+  contentType: string,
+  slot: IdentityUploadSlot = "front"
+) {
+  if (slot === "face" && !IMAGE_TYPES.includes(contentType)) {
+    throw new Error("La photo du visage doit être une image JPEG, PNG, WEBP ou GIF.");
+  }
+  return createPrivateUploadPost(`identity/${userId}/${slot}`, fileName, contentType, MAX_DOCUMENT_BYTES);
 }
 
 /**
@@ -146,14 +156,23 @@ export async function uploadAvatar(userId: string, fileName: string, contentType
   return { key, publicUrl: publicUrlFor(key) };
 }
 
-export async function uploadIdentityDocument(userId: string, fileName: string, contentType: string, body: Uint8Array) {
+export async function uploadIdentityDocument(
+  userId: string,
+  fileName: string,
+  contentType: string,
+  body: Uint8Array,
+  slot: IdentityUploadSlot = "front"
+) {
   if (!PRIVATE_BUCKET) throw new StorageNotConfiguredError();
   if (!DOCUMENT_TYPES.includes(contentType)) {
     throw new Error("Type de fichier non autorisé (images JPEG/PNG/WEBP ou PDF uniquement).");
   }
+  if (slot === "face" && !IMAGE_TYPES.includes(contentType)) {
+    throw new Error("La photo du visage doit être une image JPEG, PNG, WEBP ou GIF.");
+  }
   const maxBytes = 4 * 1024 * 1024;
   if (body.byteLength > maxBytes) throw new Error("Fichier trop volumineux (maximum 4 Mo sur Vercel).");
-  const key = `identity/${userId}/${safeKeySegment(fileName)}`;
+  const key = `identity/${userId}/${slot}/${safeKeySegment(fileName)}`;
   const client = getClient();
   await client.send(new PutObjectCommand({ Bucket: PRIVATE_BUCKET, Key: key, Body: body, ContentType: contentType }));
   return { key };

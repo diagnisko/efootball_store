@@ -40,6 +40,7 @@ enum DocumentType {
   NATIONAL_ID
   PASSPORT
   OTHER
+  FACE_PHOTO
 }
 
 enum DocumentSide {

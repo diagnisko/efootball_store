@@ -14,16 +14,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Votre identité est déjà vérifiée." }, { status: 400 });
   }
 
-  const { phone, country, documentType, documentKey, locationConsent } = (await req.json().catch(() => ({}))) as {
+  const { phone, country, documentType, frontKey, backKey, facePhotoKey, locationConsent } = (await req.json().catch(() => ({}))) as {
     phone?: string;
     country?: string;
     documentType?: "NATIONAL_ID" | "PASSPORT" | "OTHER";
-    documentKey?: string;
+    frontKey?: string;
+    backKey?: string;
+    facePhotoKey?: string;
     locationConsent?: boolean;
   };
 
   if (!phone || !country || !documentType) {
     return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
+  }
+  if (!frontKey || !backKey || !facePhotoKey) {
+    return NextResponse.json({ error: "Le recto, le verso et une photo claire du visage sont requis." }, { status: 400 });
+  }
+  const uploadedKeys = [frontKey, backKey, facePhotoKey];
+  if (uploadedKeys.some((key) => !key.startsWith(`identity/${userId}/`))) {
+    return NextResponse.json({ error: "Fichier de vérification invalide." }, { status: 400 });
   }
   if (locationConsent !== true) {
     return NextResponse.json({ error: "Votre accord pour le partage de votre localisation est requis." }, { status: 400 });
@@ -41,16 +50,30 @@ export async function POST(req: Request) {
       where: { id: userId },
       data: { phone, country, verificationStatus: "PENDING", locationConsent: true, locationConsentAt: new Date() },
     }),
-    // fileUrl contient la clé S3 (bucket privé) renvoyée par /api/uploads/identity-document —
-    // jamais une URL publique. Si aucun fichier n'a été réellement téléversé (ex: stockage
-    // cloud non configuré côté serveur), on retombe sur un marqueur explicite plutôt que de
-    // prétendre qu'un document existe.
     prisma.identityDocument.create({
       data: {
         userId,
         documentType,
+        side: "FRONT",
+        fileUrl: frontKey,
+        status: "PENDING",
+      },
+    }),
+    prisma.identityDocument.create({
+      data: {
+        userId,
+        documentType,
+        side: "BACK",
+        fileUrl: backKey,
+        status: "PENDING",
+      },
+    }),
+    prisma.identityDocument.create({
+      data: {
+        userId,
+        documentType: "FACE_PHOTO",
         side: "SINGLE",
-        fileUrl: documentKey || "pending-upload://no-file-provided",
+        fileUrl: facePhotoKey,
         status: "PENDING",
       },
     }),

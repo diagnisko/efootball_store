@@ -14,7 +14,9 @@ export default function VerificationPage() {
   const [country, setCountry] = useState("");
   const [locationConsent, setLocationConsent] = useState(false);
   const [documentType, setDocumentType] = useState<"NATIONAL_ID" | "PASSPORT" | "OTHER">("NATIONAL_ID");
-  const [documentKey, setDocumentKey] = useState<string | null>(null);
+  const [frontKey, setFrontKey] = useState<string | null>(null);
+  const [backKey, setBackKey] = useState<string | null>(null);
+  const [facePhotoKey, setFacePhotoKey] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,7 @@ export default function VerificationPage() {
     if (status === "unauthenticated") router.push("/login");
   }, [status, router]);
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, slot: "front" | "back" | "face") {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
@@ -33,13 +35,18 @@ export default function VerificationPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("slot", slot);
       const response = await fetch("/api/uploads/identity-document", { method: "POST", body: formData });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || "Échec de l'upload.");
-      setDocumentKey(result.key);
+      if (slot === "front") setFrontKey(result.key);
+      if (slot === "back") setBackKey(result.key);
+      if (slot === "face") setFacePhotoKey(result.key);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : "Échec de l'upload.");
-      setDocumentKey(null);
+      if (slot === "front") setFrontKey(null);
+      if (slot === "back") setBackKey(null);
+      if (slot === "face") setFacePhotoKey(null);
     } finally {
       setUploading(false);
     }
@@ -51,7 +58,7 @@ export default function VerificationPage() {
     const res = await fetch("/api/verification/submit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, country, documentType, documentKey: documentKey ?? undefined, locationConsent }),
+      body: JSON.stringify({ phone, country, documentType, frontKey, backKey, facePhotoKey, locationConsent }),
     });
     setLoading(false);
     if (!res.ok) {
@@ -162,22 +169,34 @@ export default function VerificationPage() {
               <input
                 type="file"
                 accept="image/*,.pdf"
-                onChange={handleFileChange}
+                onChange={(e) => handleFileChange(e, "front")}
                 disabled={uploading}
                 className="u-muted"
               />
               {uploading && <p className="settings-hint" style={{ color: "var(--cyan)" }}>Envoi en cours...</p>}
-              {documentKey && !uploading && (
+              {frontKey && !uploading && (
                 <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Document envoyé et prêt à être soumis.</p>
               )}
               {uploadError && <p className="settings-error">{uploadError}</p>}
+            </div>
+
+            <div className="u-mb-5">
+              <label className="settings-label">Document (verso)</label>
+              <input type="file" accept="image/*,.pdf" onChange={(e) => handleFileChange(e, "back")} disabled={uploading} className="u-muted" />
+              {backKey && !uploading && <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Verso envoyé et prêt à être soumis.</p>}
+            </div>
+
+            <div className="u-mb-5">
+              <label className="settings-label">Photo claire de votre visage</label>
+              <input type="file" accept="image/*" capture="user" onChange={(e) => handleFileChange(e, "face")} disabled={uploading} className="u-muted" />
+              {facePhotoKey && !uploading && <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Photo envoyée et prête à être soumise.</p>}
             </div>
 
             {error && <p className="settings-error">{error}</p>}
 
             <div style={{ display: "flex", gap: 12 }}>
               <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setStep(2)} disabled={loading}>Retour</button>
-              <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSubmit} disabled={loading || !locationConsent || !documentKey}>
+              <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSubmit} disabled={loading || !locationConsent || !frontKey || !backKey || !facePhotoKey}>
                 {loading ? "Envoi..." : "Soumettre pour vérification"}
               </button>
             </div>

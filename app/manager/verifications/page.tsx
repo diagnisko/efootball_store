@@ -56,7 +56,10 @@ export default async function ManagerVerificationsPage() {
                         className="link-arrow"
                         style={{ display: "block", fontSize: 12 }}
                       >
-                        {d.documentType === "NATIONAL_ID" ? "CNI" : d.documentType === "PASSPORT" ? "Passeport" : "Document"} <IconArrowRight />
+                        {d.documentType === "FACE_PHOTO"
+                          ? "Photo du visage"
+                          : `${d.documentType === "NATIONAL_ID" ? "CNI" : d.documentType === "PASSPORT" ? "Passeport" : "Document"} ${d.side === "FRONT" ? "(recto)" : d.side === "BACK" ? "(verso)" : ""}`}
+                        <IconArrowRight />
                       </a>
                     ))}
                   </td>
