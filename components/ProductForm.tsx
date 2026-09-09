@@ -53,15 +53,8 @@ export function ProductForm({ initial }: { initial?: InitialData }) {
   async function handleFileUpload(i: number, file: File) {
     setUploadingIndex(i);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch("/api/uploads/product-media", { method: "POST", body: formData });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || "Échec de l'upload.");
-      updateMedia(i, {
-        url: result.publicUrl ?? "",
-        mediaType: result.mediaType ?? "IMAGE",
-      });
+      const uploaded = await uploadFileViaPresignedPost("/api/uploads/product-media", file);
+      updateMedia(i, { url: uploaded.publicUrl ?? "", mediaType: uploaded.mediaType ?? "IMAGE" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Échec de l'upload.");
     } finally {
@@ -235,7 +228,7 @@ export function ProductForm({ initial }: { initial?: InitialData }) {
                 {uploadingIndex === i ? "Envoi..." : "Téléverser"}
                 <input
                   type="file"
-                  accept="image/*,video/mp4,video/webm"
+                  accept="image/*,video/*"
                   style={{ display: "none" }}
                   disabled={uploadingIndex !== null}
                   onChange={(e) => {

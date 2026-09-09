@@ -26,7 +26,7 @@ function getClient(): S3Client {
 }
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const VIDEO_TYPES = ["video/mp4", "video/webm"];
+const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime", "video/3gpp", "video/x-m4v"];
 const DOCUMENT_TYPES = [...IMAGE_TYPES, "application/pdf"];
 
 const MAX_MEDIA_IMAGE_BYTES = 8 * 1024 * 1024; // 8 Mo
