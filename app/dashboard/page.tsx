@@ -41,7 +41,7 @@ export default async function DashboardPage() {
     }),
     prisma.notification.count({ where: { userId } }),
     prisma.accessInformation.findMany({
-      where: { visibleToClient: true, purchase: { userId } },
+      where: { visibleToClient: true, purchase: { userId, status: { in: ["ACTIVE", "COMPLETED"] } } },
       include: { purchase: { include: { product: true } } },
       orderBy: { releasedAt: "desc" },
     }),
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
       include: { messages: { orderBy: { createdAt: "desc" }, take: 3, include: { sender: true } } },
     }),
     prisma.verificationCodeRequest.findFirst({
-      where: { purchase: { userId } },
+      where: { purchase: { userId, status: { in: ["ACTIVE", "COMPLETED"] } } },
       orderBy: { createdAt: "desc" },
     }),
   ]);
@@ -247,11 +247,13 @@ export default async function DashboardPage() {
         </>
       )}
 
-      {accessInfo.length > 0 && (
+      {purchase && purchase.status !== "AWAITING_DEPOSIT" && (
         <div className="panel card u-mb-5">
-          <div className="card-head">
-            <h3>Informations d&apos;accès</h3>
-          </div>
+          {accessInfo.length > 0 && (
+            <>
+              <div className="card-head">
+                <h3>Informations d&apos;accès</h3>
+              </div>
           <div className="stack-sm u-mb-4">
             {accessInfo.map((info) => (
               <div key={info.id} className="access-info-item">
@@ -265,6 +267,8 @@ export default async function DashboardPage() {
               </div>
             ))}
           </div>
+            </>
+          )}
 
           <div style={{ borderTop: "1px solid var(--glass-border-soft)", paddingTop: "var(--sp-4)" }}>
             <h4 style={{ fontSize: 13, marginBottom: 6 }}>Code de vérification (2FA)</h4>

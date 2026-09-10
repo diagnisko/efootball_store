@@ -12,6 +12,7 @@ import {
   depositRejectedEmail,
   installmentConfirmedEmail,
   installmentRejectedEmail,
+  accessInfoReleasedEmail,
 } from "@/lib/email-templates";
 
 function addMonths(date: Date, months: number): Date {
@@ -136,6 +137,17 @@ export async function PATCH(req: Request, { params }: { params: { submissionId: 
             },
           })
         );
+        ops.push(
+          prisma.notification.create({
+            data: {
+              userId: purchase.userId,
+              type: "access_info_released",
+              title: "Vos informations d'accès sont disponibles",
+              body: `Les identifiants de votre compte "${purchase.product.title}" sont disponibles dans votre espace client.`,
+              link: "/dashboard",
+            },
+          })
+        );
       }
       notifTitle = "Apport initial validé";
       notifBody = plan.paymentMode === "ONE_TIME"
@@ -252,6 +264,12 @@ export async function PATCH(req: Request, { params }: { params: { submissionId: 
         ...(decision === "confirm"
           ? installmentConfirmedEmail(submission.user.firstName, submission.paymentSchedule.installmentNumber)
           : installmentRejectedEmail(submission.user.firstName, submission.paymentSchedule.installmentNumber, note)),
+      });
+    }
+    if (isDeposit && accountEmail?.trim() && accountPassword) {
+      await sendEmail({
+        to: submission.user.email,
+        ...accessInfoReleasedEmail(submission.user.firstName, submission.paymentPlan!.purchase.product.title),
       });
     }
   }
