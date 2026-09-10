@@ -199,7 +199,6 @@ export default async function DashboardPage() {
                   <div key={info.id} className="access-info-item">
                     <div className="card-head u-mb-2">
                       <h4 style={{ fontSize: 14 }}>{info.title}</h4>
-                      <span className="u-muted-sm">{info.purchase.product.title}</span>
                     </div>
                     <pre style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, color: "var(--ivory)", whiteSpace: "pre-wrap" }}>
                       {info.content}
