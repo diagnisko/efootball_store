@@ -741,19 +741,37 @@ body:has(.bo-shell){ background:var(--bo-bg); }
 .bo-access-form{display:flex;gap:6px;align-items:center;flex-wrap:wrap;width:100%;padding:8px;background:rgba(201,242,105,.06);border:1px solid var(--bo-border);}
 .bo-access-form input{background:rgba(255,255,255,.04);border:1px solid var(--bo-border);color:var(--bo-text);padding:8px 10px;font-size:12px;min-width:180px;}
 .bo-payment-timeline{margin:20px 0;}
-.bo-section-heading{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;}
-.bo-section-heading h2{font-size:18px;margin-bottom:5px;}
+.bo-section-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px;}
+.bo-section-heading h2{font-size:20px;margin-bottom:6px;}
 .bo-section-heading p{font-size:12px;color:var(--bo-muted);}
-.bo-payment-months{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;}
-.bo-payment-month{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--bo-border-soft);background:rgba(255,255,255,.025);font-size:12px;}
-.bo-payment-month strong{font-size:13px;}
-.bo-payment-month small{color:var(--bo-muted);}
-.bo-payment-dot{width:10px;height:10px;border-radius:50%;background:var(--bo-muted-2);}
-.bo-payment-month.paid{border-color:rgba(201,242,105,.5);}.bo-payment-month.paid .bo-payment-dot{background:var(--ok);box-shadow:0 0 10px var(--ok);}
-.bo-payment-month.waiting{border-color:rgba(232,174,43,.6);animation:bo-payment-pulse 1.4s ease-in-out infinite;}.bo-payment-month.waiting .bo-payment-dot{background:var(--warn);}
-.bo-payment-month.late{border-color:rgba(239,114,114,.5);}.bo-payment-month.late .bo-payment-dot{background:var(--danger);box-shadow:0 0 8px var(--danger);}
+.bo-payment-plan-label{padding:7px 10px;border:1px solid rgba(201,242,105,.32);border-radius:999px;color:var(--bo-accent);font:600 11px 'JetBrains Mono';white-space:nowrap;}
+.bo-payment-overview{display:grid;grid-template-columns:minmax(220px,1fr) repeat(3,86px);gap:10px;align-items:stretch;margin-bottom:18px;}
+.bo-payment-progress-block{padding:14px 16px;border:1px solid var(--bo-border);background:linear-gradient(135deg,rgba(201,242,105,.08),rgba(255,255,255,.02));}
+.bo-payment-progress-top,.bo-payment-progress-meta{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:11px;color:var(--bo-muted);}
+.bo-payment-progress-top strong{font:600 18px 'Chakra Petch';color:var(--bo-text);}
+.bo-payment-progress-track{height:8px;margin:14px 0 10px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;}
+.bo-payment-progress-track span{display:block;height:100%;background:linear-gradient(90deg,var(--bo-accent),#dfff8b);border-radius:inherit;transition:width .5s ease;}
+.bo-payment-progress-meta{font-size:10px;}
+.bo-payment-progress-meta strong{color:var(--bo-text);font-weight:600;}
+.bo-payment-stat{display:flex;flex-direction:column;justify-content:center;padding:12px;border:1px solid var(--bo-border);background:rgba(255,255,255,.025);}
+.bo-payment-stat strong{font:600 24px 'Chakra Petch';color:var(--bo-text);}.bo-payment-stat span{font-size:10px;color:var(--bo-muted);margin-top:4px;}
+.bo-payment-stat.is-paid strong{color:var(--ok);}.bo-payment-stat.is-waiting strong{color:var(--warn);}.bo-payment-stat.is-late strong{color:var(--danger);}
+.bo-payment-legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 14px;color:var(--bo-muted);font-size:10px;}
+.bo-payment-legend span{display:inline-flex;align-items:center;gap:6px;}.bo-payment-legend i{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--bo-muted-2);}.bo-payment-legend i.paid{background:var(--ok);}.bo-payment-legend i.waiting{background:var(--warn);}.bo-payment-legend i.late{background:var(--danger);}
+.bo-payment-months{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.bo-payment-month{display:flex;flex-direction:column;gap:9px;min-height:142px;padding:14px;border:1px solid var(--bo-border-soft);background:rgba(255,255,255,.025);font-size:12px;transition:transform .18s,border-color .18s,background .18s;}
+.bo-payment-month:hover{transform:translateY(-2px);background:rgba(255,255,255,.045);}
+.bo-payment-month-head{display:flex;align-items:center;justify-content:space-between;gap:6px;color:var(--bo-text);font:600 13px 'Chakra Petch';}.bo-payment-month-head b{font:600 9px 'JetBrains Mono';text-transform:uppercase;letter-spacing:.04em;color:var(--bo-muted);}
+.bo-payment-month strong{font:600 16px 'Chakra Petch';color:var(--bo-text);}.bo-payment-month strong small{font:500 10px 'JetBrains Mono';color:var(--bo-muted);}
+.bo-payment-date{font-size:10px;color:var(--bo-muted-2);}
+.bo-payment-state{display:flex;align-items:center;gap:6px;margin-top:auto;font-size:10px;color:var(--bo-muted);}.bo-payment-dot{width:8px;height:8px;border-radius:50%;background:var(--bo-muted-2);}
+.bo-payment-month.paid{border-color:rgba(201,242,105,.42);background:linear-gradient(160deg,rgba(201,242,105,.09),rgba(255,255,255,.025));}.bo-payment-month.paid .bo-payment-dot{background:var(--ok);box-shadow:0 0 10px var(--ok);}.bo-payment-month.paid .bo-payment-month-head b{color:var(--ok);}
+.bo-payment-month.waiting{border-color:rgba(232,174,43,.6);animation:bo-payment-pulse 1.4s ease-in-out infinite;}.bo-payment-month.waiting .bo-payment-dot{background:var(--warn);}.bo-payment-month.waiting .bo-payment-month-head b{color:var(--warn);}
+.bo-payment-month.late{border-color:rgba(239,114,114,.5);}.bo-payment-month.late .bo-payment-dot{background:var(--danger);box-shadow:0 0 8px var(--danger);}.bo-payment-month.late .bo-payment-month-head b{color:var(--danger);}
 @keyframes bo-payment-pulse{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:.55;transform:translateY(-2px)}}
 @media (prefers-reduced-motion:reduce){.bo-payment-month.waiting{animation:none;}}
+@media(max-width:700px){.bo-payment-overview{grid-template-columns:1fr 1fr;}.bo-payment-progress-block{grid-column:1/-1;}.bo-payment-months{grid-template-columns:repeat(2,minmax(0,1fr));}.bo-section-heading{flex-direction:column;}.bo-payment-plan-label{align-self:flex-start;}}
+@media(max-width:420px){.bo-payment-months{grid-template-columns:1fr;}.bo-payment-month{min-height:126px;}}
 
 .bo-kv{ font-size:13px; color:var(--bo-muted); line-height:2.1; }
 .bo-kv b, .bo-kv strong{ color:var(--bo-text); font-weight:600; }
