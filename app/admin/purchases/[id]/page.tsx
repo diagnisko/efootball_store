@@ -9,6 +9,7 @@ export default async function AdminPurchaseDetailPage({ params }: { params: { id
       user: true,
       product: true,
       accessInformation: { orderBy: { createdAt: "desc" } },
+      paymentPlan: { include: { schedules: { orderBy: { installmentNumber: "asc" } } } },
     },
   });
   if (!purchase) notFound();
@@ -23,6 +24,31 @@ export default async function AdminPurchaseDetailPage({ params }: { params: { id
           </p>
         </div>
       </div>
+
+      {purchase.paymentPlan && purchase.paymentPlan.schedules.length > 0 && (
+        <div className="bo-panel bo-panel-pad bo-payment-timeline">
+          <div className="bo-section-heading">
+            <div>
+              <h2>Évolution des paiements</h2>
+              <p>Vert = payé, pulsation = validation en cours, rouge = à payer ou en retard.</p>
+            </div>
+          </div>
+          <div className="bo-payment-months">
+            {purchase.paymentPlan.schedules.map((schedule) => {
+              const state = schedule.status === "PAID" ? "paid" : schedule.status === "AWAITING_VALIDATION" ? "waiting" : schedule.status === "UPCOMING" ? "upcoming" : "late";
+              const label = state === "paid" ? "Payé" : state === "waiting" ? "En validation" : state === "upcoming" ? "À venir" : "À payer";
+              return (
+                <div className={`bo-payment-month ${state}`} key={schedule.id}>
+                  <span className="bo-payment-dot" />
+                  <strong>Mois {schedule.installmentNumber}</strong>
+                  <span>{Number(schedule.amount).toLocaleString("fr-FR")} FCFA</span>
+                  <small>{label}</small>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <AccessInfoManager
         purchaseId={purchase.id}

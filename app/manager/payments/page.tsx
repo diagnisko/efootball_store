@@ -64,7 +64,7 @@ export default async function ManagerPaymentsPage() {
                         <span style={{ fontSize: 12, color: "var(--bo-muted-2)" }}>—</span>
                       )}
                     </td>
-                    <td><PaymentActions submissionId={s.id} /></td>
+                    <td><PaymentActions submissionId={s.id} isDeposit={isDeposit} /></td>
                   </tr>
                 );
               })}

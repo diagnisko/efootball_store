@@ -27,9 +27,11 @@ export async function PATCH(req: Request, { params }: { params: { submissionId: 
   const actorId = (session.user as { id: string }).id;
   const actorRole = (session.user as { role: string }).role;
 
-  const { decision, note } = (await req.json().catch(() => ({}))) as {
+  const { decision, note, accountEmail, accountPassword } = (await req.json().catch(() => ({}))) as {
     decision?: "confirm" | "reject" | "info_requested";
     note?: string;
+    accountEmail?: string;
+    accountPassword?: string;
   };
   if (!decision || !["confirm", "reject", "info_requested"].includes(decision)) {
     return NextResponse.json({ error: "Décision invalide." }, { status: 400 });
@@ -55,6 +57,10 @@ export async function PATCH(req: Request, { params }: { params: { submissionId: 
   }
 
   const isDeposit = !submission.paymentScheduleId && !!submission.paymentPlanId;
+
+  if (isDeposit && decision === "confirm" && (!accountEmail?.trim() || !accountPassword)) {
+    return NextResponse.json({ error: "L'e-mail et le mot de passe du compte sont obligatoires pour approuver l'apport." }, { status: 400 });
+  }
 
   const confirmationDecision =
     decision === "confirm" ? "CONFIRMED" : decision === "reject" ? "REJECTED" : "INFO_REQUESTED";
@@ -116,6 +122,20 @@ export async function PATCH(req: Request, { params }: { params: { submissionId: 
             })
           );
         }
+      }
+      if (accountEmail?.trim() && accountPassword) {
+        ops.push(
+          prisma.accessInformation.create({
+            data: {
+              purchaseId: purchase.id,
+              title: "Identifiants du compte",
+              content: `E-mail : ${accountEmail.trim()}\nMot de passe : ${accountPassword}`,
+              visibleToClient: true,
+              releasedAt: new Date(),
+              createdBy: actorId,
+            },
+          })
+        );
       }
       notifTitle = "Apport initial validé";
       notifBody = plan.paymentMode === "ONE_TIME"

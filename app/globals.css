@@ -730,6 +730,22 @@ body:has(.bo-shell){ background:var(--bo-bg); }
 .bo-btn-danger{ border-color:rgba(240,53,154,.4); color:var(--neon); background:rgba(240,53,154,.06); }
 .bo-btn-danger:hover{ background:rgba(240,53,154,.14); }
 .bo-btn-sm{ padding:7px 12px; font-size:12px; }
+.bo-access-form{display:flex;gap:6px;align-items:center;flex-wrap:wrap;width:100%;padding:8px;background:rgba(201,242,105,.06);border:1px solid var(--bo-border);}
+.bo-access-form input{background:rgba(255,255,255,.04);border:1px solid var(--bo-border);color:var(--bo-text);padding:8px 10px;font-size:12px;min-width:180px;}
+.bo-payment-timeline{margin:20px 0;}
+.bo-section-heading{display:flex;justify-content:space-between;gap:16px;margin-bottom:18px;}
+.bo-section-heading h2{font-size:18px;margin-bottom:5px;}
+.bo-section-heading p{font-size:12px;color:var(--bo-muted);}
+.bo-payment-months{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;}
+.bo-payment-month{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--bo-border-soft);background:rgba(255,255,255,.025);font-size:12px;}
+.bo-payment-month strong{font-size:13px;}
+.bo-payment-month small{color:var(--bo-muted);}
+.bo-payment-dot{width:10px;height:10px;border-radius:50%;background:var(--bo-muted-2);}
+.bo-payment-month.paid{border-color:rgba(201,242,105,.5);}.bo-payment-month.paid .bo-payment-dot{background:var(--ok);box-shadow:0 0 10px var(--ok);}
+.bo-payment-month.waiting{border-color:rgba(232,174,43,.6);animation:bo-payment-pulse 1.4s ease-in-out infinite;}.bo-payment-month.waiting .bo-payment-dot{background:var(--warn);}
+.bo-payment-month.late{border-color:rgba(239,114,114,.5);}.bo-payment-month.late .bo-payment-dot{background:var(--danger);box-shadow:0 0 8px var(--danger);}
+@keyframes bo-payment-pulse{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:.55;transform:translateY(-2px)}}
+@media (prefers-reduced-motion:reduce){.bo-payment-month.waiting{animation:none;}}
 
 .bo-kv{ font-size:13px; color:var(--bo-muted); line-height:2.1; }
 .bo-kv b, .bo-kv strong{ color:var(--bo-text); font-weight:600; }
