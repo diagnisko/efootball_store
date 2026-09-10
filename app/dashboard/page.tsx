@@ -183,6 +183,54 @@ export default async function DashboardPage() {
             </div>
           </div>
 
+          <div className="panel card access-delivery-panel u-mb-5">
+            <div className="card-head">
+              <div>
+                <h3>Accès du compte</h3>
+                <p className="u-muted-sm">Vos identifiants et votre code de vérification sont regroupés ici.</p>
+              </div>
+              <span className={`badge ${accessInfo.length > 0 ? "badge-ok" : "badge-warn"}`}>
+                {accessInfo.length > 0 ? "Disponible" : "En attente de remise"}
+              </span>
+            </div>
+            {accessInfo.length > 0 ? (
+              <div className="stack-sm">
+                {accessInfo.map((info) => (
+                  <div key={info.id} className="access-info-item">
+                    <div className="card-head u-mb-2">
+                      <h4 style={{ fontSize: 14 }}>{info.title}</h4>
+                      <span className="u-muted-sm">{info.purchase.product.title}</span>
+                    </div>
+                    <pre style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, color: "var(--ivory)", whiteSpace: "pre-wrap" }}>
+                      {info.content}
+                    </pre>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="access-pending-note">
+                Les identifiants seront visibles ici dès que l&apos;administrateur aura validé votre paiement et remis le compte.
+              </p>
+            )}
+
+            <div className="verification-request-box">
+              <div>
+                <h4 style={{ fontSize: 13 }}>Code de vérification (2FA)</h4>
+                <p className="u-muted-sm">Demandez le code reçu sur l&apos;email ou le téléphone associé au compte.</p>
+              </div>
+              {!verificationCodeRequest || verificationCodeRequest.status === "CANCELLED" ? (
+                <RequestVerificationCodeButton purchaseId={purchase.id} />
+              ) : verificationCodeRequest.status === "PENDING" ? (
+                <span className="badge badge-warn">Demande en attente</span>
+              ) : (
+                <div className="access-info-item verification-code-value">
+                  <span className="u-muted-sm">Code fourni</span>
+                  <strong className="mono">{verificationCodeRequest.code}</strong>
+                </div>
+              )}
+            </div>
+          </div>
+
           {nextDue && (
             <div className="panel card u-mb-5">
               <h3>Prochaine échéance</h3>
@@ -245,51 +293,6 @@ export default async function DashboardPage() {
             </table>
           </div>
         </>
-      )}
-
-      {purchase && purchase.status !== "AWAITING_DEPOSIT" && (
-        <div className="panel card u-mb-5">
-          {accessInfo.length > 0 && (
-            <>
-              <div className="card-head">
-                <h3>Informations d&apos;accès</h3>
-              </div>
-          <div className="stack-sm u-mb-4">
-            {accessInfo.map((info) => (
-              <div key={info.id} className="access-info-item">
-                <div className="card-head u-mb-2">
-                  <h4 style={{ fontSize: 14 }}>{info.title}</h4>
-                  <span className="u-muted-sm">{info.purchase.product.title}</span>
-                </div>
-                <pre style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, color: "var(--ivory)", whiteSpace: "pre-wrap" }}>
-                  {info.content}
-                </pre>
-              </div>
-            ))}
-          </div>
-            </>
-          )}
-
-          <div style={{ borderTop: "1px solid var(--glass-border-soft)", paddingTop: "var(--sp-4)" }}>
-            <h4 style={{ fontSize: 13, marginBottom: 6 }}>Code de vérification (2FA)</h4>
-            <p className="u-muted u-mb-3">
-              Au premier login sur ce compte, le jeu peut demander un code de vérification envoyé
-              sur l&apos;email ou le téléphone resté associé au compte. Demandez-le ici si besoin.
-            </p>
-            {!verificationCodeRequest || verificationCodeRequest.status === "CANCELLED" ? (
-              purchase && <RequestVerificationCodeButton purchaseId={purchase.id} />
-            ) : verificationCodeRequest.status === "PENDING" ? (
-              <span className="badge badge-warn">Demande envoyée — en attente du manager</span>
-            ) : (
-              <div className="access-info-item">
-                <div className="u-muted-sm u-mb-2">Code fourni</div>
-                <div className="mono" style={{ fontSize: 18, letterSpacing: "0.1em", color: "var(--ivory)" }}>
-                  {verificationCodeRequest.code}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
       )}
 
       {conversation && conversation.messages.length > 0 && (
