@@ -58,11 +58,14 @@ export function DeclareMultiplePaymentsButton({ schedules }: { schedules: Schedu
             <p className="hint">Vous pouvez payer plusieurs mois à la fois ou solder votre plan.</p>
             <label className="settings-label">Nombre de mois</label>
             <select value={count} onChange={(event) => setCount(Number(event.target.value))} disabled={loading}>
-              {payable.map((schedule, index) => (
-                <option key={schedule.id} value={index + 1}>
-                  {index + 1 === payable.length ? "Tout le solde" : `${index + 1} mois`}
+              {payable.slice(1).map((schedule, index) => {
+                const monthCount = index + 2;
+                return (
+                <option key={schedule.id} value={monthCount}>
+                  {monthCount === payable.length ? "Tout le solde" : `${monthCount} mois`}
                 </option>
-              ))}
+                );
+              })}
             </select>
             <p className="hint">Montant déclaré : {total.toLocaleString("fr-FR")} FCFA</p>
             <input type="text" placeholder="Référence de transaction (optionnel)" value={reference} onChange={(event) => setReference(event.target.value)} />

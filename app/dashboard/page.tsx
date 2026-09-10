@@ -27,7 +27,7 @@ export default async function DashboardPage() {
   const [user, purchase, notifications, notificationsTotal, accessInfo, conversation, verificationCodeRequest] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
     prisma.purchase.findFirst({
-      where: { userId, status: { in: ["AWAITING_DEPOSIT", "ACTIVE"] } },
+      where: { userId, status: { in: ["AWAITING_DEPOSIT", "ACTIVE", "COMPLETED"] } },
       include: {
         product: { include: { media: { where: { isMain: true }, take: 1 } } },
         paymentPlan: { include: { schedules: { orderBy: { installmentNumber: "asc" } } } },
@@ -69,6 +69,7 @@ export default async function DashboardPage() {
   const totalPrice = purchase ? Number(purchase.totalPrice) : 0;
   const progressPct = totalPrice > 0 ? Math.round((paidAmount / totalPrice) * 100) : 0;
   const nextDue = schedules.find((s) => s.status === "DUE" || s.status === "LATE");
+  const receiptReady = purchase?.status === "COMPLETED" && purchase.paymentPlan?.status === "COMPLETED";
 
   return (
     <div className="dash">
@@ -151,6 +152,11 @@ export default async function DashboardPage() {
                   <div className="price">
                     {totalPrice.toLocaleString("fr-FR")} FCFA
                   </div>
+                  {receiptReady && (
+                    <a className="btn btn-primary btn-mini u-mt-2" href={`/api/purchases/${purchase.id}/receipt`} download>
+                      Télécharger mon reçu détaillé
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
