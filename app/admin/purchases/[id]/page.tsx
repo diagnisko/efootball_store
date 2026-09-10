@@ -20,6 +20,8 @@ export default async function AdminPurchaseDetailPage({ params }: { params: { id
     .filter((schedule) => schedule.status === "PAID")
     .reduce((total, schedule) => total + Number(schedule.amount), 0);
   const progress = schedules.length ? Math.round((paidCount / schedules.length) * 100) : 0;
+  const activeSchedule = schedules.find((schedule) => ["AWAITING_VALIDATION", "DUE", "LATE"].includes(schedule.status));
+  const activeLabel = activeSchedule?.status === "AWAITING_VALIDATION" ? "Validation en cours" : activeSchedule?.status === "LATE" ? "Paiement en retard" : activeSchedule ? "Prochaine échéance" : "Plan à venir";
 
   return (
     <div>
@@ -41,6 +43,11 @@ export default async function AdminPurchaseDetailPage({ params }: { params: { id
             </div>
             <span className="bo-payment-plan-label">{purchase.paymentPlan.installmentsCount} mois</span>
           </div>
+          <div className="bo-payment-focus">
+            <div className="bo-payment-focus-icon">{activeSchedule ? String(activeSchedule.installmentNumber).padStart(2, "0") : "✓"}</div>
+            <div className="bo-payment-focus-copy"><span>{activeLabel}</span><strong>{activeSchedule ? `${Number(activeSchedule.amount).toLocaleString("fr-FR")} FCFA` : "Paiements à jour"}</strong></div>
+            <div className="bo-payment-focus-detail">{activeSchedule ? `Échéance du ${new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "long", year: "numeric" }).format(activeSchedule.dueDate)}` : "Toutes les échéances sont traitées"}</div>
+          </div>
           <div className="bo-payment-overview">
             <div className="bo-payment-progress-block">
               <div className="bo-payment-progress-top">
@@ -57,21 +64,18 @@ export default async function AdminPurchaseDetailPage({ params }: { params: { id
             <div className="bo-payment-stat is-waiting"><strong>{waitingCount}</strong><span>En validation</span></div>
             <div className="bo-payment-stat is-late"><strong>{schedules.length - paidCount - waitingCount}</strong><span>À traiter</span></div>
           </div>
-          <div className="bo-payment-legend">
-            <span><i className="paid" /> Payé</span>
-            <span><i className="waiting" /> Validation en cours</span>
-            <span><i className="late" /> À payer / en retard</span>
-          </div>
-          <div className="bo-payment-months">
+          <div className="bo-payment-legend"><span><i className="paid" /> Payé</span><span><i className="waiting" /> En validation</span><span><i className="late" /> À traiter</span></div>
+          <div className="bo-payment-track">
+            <div className="bo-payment-track-line" />
             {schedules.map((schedule) => {
               const state = schedule.status === "PAID" ? "paid" : schedule.status === "AWAITING_VALIDATION" ? "waiting" : schedule.status === "UPCOMING" ? "upcoming" : "late";
               const label = state === "paid" ? "Payé" : state === "waiting" ? "En validation" : state === "upcoming" ? "À venir" : "À payer";
               return (
                 <div className={`bo-payment-month ${state}`} key={schedule.id}>
+                  <div className="bo-payment-node"><i className="bo-payment-dot" /></div>
                   <div className="bo-payment-month-head"><span>Mois {String(schedule.installmentNumber).padStart(2, "0")}</span><b>{label}</b></div>
                   <strong>{Number(schedule.amount).toLocaleString("fr-FR")} <small>FCFA</small></strong>
-                  <span className="bo-payment-date">Échéance {new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).format(schedule.dueDate)}</span>
-                  <div className="bo-payment-state"><i className="bo-payment-dot" />{label}</div>
+                  <span className="bo-payment-date">{new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).format(schedule.dueDate)}</span>
                 </div>
               );
             })}

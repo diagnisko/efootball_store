@@ -759,6 +759,9 @@ body:has(.bo-shell){ background:var(--bo-bg); }
 .bo-section-heading h2{font-size:20px;margin-bottom:6px;}
 .bo-section-heading p{font-size:12px;color:var(--bo-muted);}
 .bo-payment-plan-label{padding:7px 10px;border:1px solid rgba(201,242,105,.32);border-radius:999px;color:var(--bo-accent);font:600 11px 'JetBrains Mono';white-space:nowrap;}
+.bo-payment-focus{display:flex;align-items:center;gap:14px;padding:14px 16px;margin-bottom:16px;background:linear-gradient(90deg,rgba(239,114,114,.11),rgba(255,255,255,.02));border:1px solid rgba(239,114,114,.32);}
+.bo-payment-focus-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--danger);color:#fff;font:600 14px 'Chakra Petch';box-shadow:0 0 18px rgba(239,114,114,.35);}
+.bo-payment-focus-copy{display:flex;flex-direction:column;gap:2px;min-width:145px;}.bo-payment-focus-copy span{color:var(--danger);font:600 10px 'JetBrains Mono';text-transform:uppercase;letter-spacing:.08em;}.bo-payment-focus-copy strong{color:var(--bo-text);font:600 18px 'Chakra Petch';}.bo-payment-focus-detail{margin-left:auto;color:var(--bo-muted);font-size:11px;}
 .bo-payment-overview{display:grid;grid-template-columns:minmax(220px,1fr) repeat(3,86px);gap:10px;align-items:stretch;margin-bottom:18px;}
 .bo-payment-progress-block{padding:14px 16px;border:1px solid var(--bo-border);background:linear-gradient(135deg,rgba(201,242,105,.08),rgba(255,255,255,.02));}
 .bo-payment-progress-top,.bo-payment-progress-meta{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:11px;color:var(--bo-muted);}
@@ -772,9 +775,10 @@ body:has(.bo-shell){ background:var(--bo-bg); }
 .bo-payment-stat.is-paid strong{color:var(--ok);}.bo-payment-stat.is-waiting strong{color:var(--warn);}.bo-payment-stat.is-late strong{color:var(--danger);}
 .bo-payment-legend{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 14px;color:var(--bo-muted);font-size:10px;}
 .bo-payment-legend span{display:inline-flex;align-items:center;gap:6px;}.bo-payment-legend i{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--bo-muted-2);}.bo-payment-legend i.paid{background:var(--ok);}.bo-payment-legend i.waiting{background:var(--warn);}.bo-payment-legend i.late{background:var(--danger);}
-.bo-payment-months{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
-.bo-payment-month{display:flex;flex-direction:column;gap:9px;min-height:142px;padding:14px;border:1px solid var(--bo-border-soft);background:rgba(255,255,255,.025);font-size:12px;transition:transform .18s,border-color .18s,background .18s;}
-.bo-payment-month:hover{transform:translateY(-2px);background:rgba(255,255,255,.045);}
+.bo-payment-track{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;padding-top:12px;}.bo-payment-track-line{position:absolute;top:22px;left:5%;right:5%;height:2px;background:var(--bo-border);}.bo-payment-months{display:contents;}
+.bo-payment-month{position:relative;z-index:1;display:flex;flex-direction:column;gap:8px;min-height:116px;padding:20px 12px 12px;border:1px solid var(--bo-border-soft);background:var(--bo-panel);font-size:12px;transition:transform .18s,border-color .18s,background .18s;}
+.bo-payment-month:hover{transform:translateY(-3px);background:var(--bo-panel-2);}
+.bo-payment-node{position:absolute;top:14px;left:50%;transform:translate(-50%,-50%);padding:4px;background:var(--bo-panel);}.bo-payment-node .bo-payment-dot{display:block;width:10px;height:10px;}
 .bo-payment-month-head{display:flex;align-items:center;justify-content:space-between;gap:6px;color:var(--bo-text);font:600 13px 'Chakra Petch';}.bo-payment-month-head b{font:600 9px 'JetBrains Mono';text-transform:uppercase;letter-spacing:.04em;color:var(--bo-muted);}
 .bo-payment-month strong{font:600 16px 'Chakra Petch';color:var(--bo-text);}.bo-payment-month strong small{font:500 10px 'JetBrains Mono';color:var(--bo-muted);}
 .bo-payment-date{font-size:10px;color:var(--bo-muted-2);}
@@ -784,8 +788,9 @@ body:has(.bo-shell){ background:var(--bo-bg); }
 .bo-payment-month.late{border-color:rgba(239,114,114,.5);}.bo-payment-month.late .bo-payment-dot{background:var(--danger);box-shadow:0 0 8px var(--danger);}.bo-payment-month.late .bo-payment-month-head b{color:var(--danger);}
 @keyframes bo-payment-pulse{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:.55;transform:translateY(-2px)}}
 @media (prefers-reduced-motion:reduce){.bo-payment-month.waiting{animation:none;}}
-@media(max-width:700px){.bo-payment-overview{grid-template-columns:1fr 1fr;}.bo-payment-progress-block{grid-column:1/-1;}.bo-payment-months{grid-template-columns:repeat(2,minmax(0,1fr));}.bo-section-heading{flex-direction:column;}.bo-payment-plan-label{align-self:flex-start;}}
-@media(max-width:420px){.bo-payment-months{grid-template-columns:1fr;}.bo-payment-month{min-height:126px;}}
+@media(max-width:900px){.bo-payment-track{grid-template-columns:repeat(4,minmax(0,1fr));}.bo-payment-track-line{display:none;}}
+@media(max-width:700px){.bo-payment-overview{grid-template-columns:1fr 1fr;}.bo-payment-progress-block{grid-column:1/-1;}.bo-section-heading{flex-direction:column;}.bo-payment-plan-label{align-self:flex-start;}.bo-payment-focus{align-items:flex-start;flex-wrap:wrap;}.bo-payment-focus-detail{width:100%;margin-left:56px;}.bo-payment-track{grid-template-columns:repeat(2,minmax(0,1fr));}.bo-payment-month{min-height:112px;}}
+@media(max-width:420px){.bo-payment-track{grid-template-columns:1fr;}.bo-payment-month{min-height:100px;}}
 
 .bo-kv{ font-size:13px; color:var(--bo-muted); line-height:2.1; }
 .bo-kv b, .bo-kv strong{ color:var(--bo-text); font-weight:600; }
