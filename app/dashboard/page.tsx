@@ -140,6 +140,46 @@ export default async function DashboardPage() {
 
       {purchase && purchase.status !== "AWAITING_DEPOSIT" && (
         <>
+          <div className="panel card access-delivery-panel access-delivery-priority u-mb-5">
+            <div className="access-delivery-header">
+              <div>
+                <span className="access-eyebrow">Accès client</span>
+                <h3>Votre compte et votre code</h3>
+                <p className="u-muted-sm">Retrouvez ici les identifiants remis par VANTA et demandez un nouveau code à tout moment.</p>
+              </div>
+              <span className={`badge ${accessInfo.length > 0 ? "badge-ok" : "badge-warn"}`}>
+                {accessInfo.length > 0 ? "Accès disponible" : "En attente"}
+              </span>
+            </div>
+            {accessInfo.length > 0 ? accessInfo.map((info) => (
+              <div key={info.id} className="access-info-item access-info-prominent">
+                <div className="access-info-label">{info.title}</div>
+                <pre>{info.content}</pre>
+              </div>
+            )) : (
+              <p className="access-pending-note">Les identifiants apparaîtront ici dès leur remise par l&apos;administrateur.</p>
+            )}
+            <div className="verification-request-box">
+              <div>
+                <h4>Code de vérification 2FA</h4>
+                <p className="u-muted-sm">Le code est envoyé sur l&apos;email ou le téléphone associé au compte.</p>
+              </div>
+              {!verificationCodeRequest || verificationCodeRequest.status === "CANCELLED" ? (
+                <RequestVerificationCodeButton purchaseId={purchase.id} />
+              ) : verificationCodeRequest.status === "PENDING" ? (
+                <span className="badge badge-warn">Demande en attente</span>
+              ) : (
+                <div className="verification-code-actions">
+                  <div className="access-info-item verification-code-value">
+                    <span className="u-muted-sm">Dernier code</span>
+                    <strong className="mono">{verificationCodeRequest.code}</strong>
+                  </div>
+                  <RequestVerificationCodeButton purchaseId={purchase.id} />
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="dash-grid">
             <div className="panel card">
               <h3>Mon achat</h3>
@@ -180,53 +220,6 @@ export default async function DashboardPage() {
                   />
                 ))}
               </div>
-            </div>
-          </div>
-
-          <div className="panel card access-delivery-panel u-mb-5">
-            <div className="card-head">
-              <div>
-                <h3>Accès du compte</h3>
-                <p className="u-muted-sm">Vos identifiants et votre code de vérification sont regroupés ici.</p>
-              </div>
-              <span className={`badge ${accessInfo.length > 0 ? "badge-ok" : "badge-warn"}`}>
-                {accessInfo.length > 0 ? "Disponible" : "En attente de remise"}
-              </span>
-            </div>
-            {accessInfo.length > 0 ? (
-              <div className="stack-sm">
-                {accessInfo.map((info) => (
-                  <div key={info.id} className="access-info-item">
-                    <div className="card-head u-mb-2">
-                      <h4 style={{ fontSize: 14 }}>{info.title}</h4>
-                    </div>
-                    <pre style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, color: "var(--ivory)", whiteSpace: "pre-wrap" }}>
-                      {info.content}
-                    </pre>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="access-pending-note">
-                Les identifiants seront visibles ici dès que l&apos;administrateur aura validé votre paiement et remis le compte.
-              </p>
-            )}
-
-            <div className="verification-request-box">
-              <div>
-                <h4 style={{ fontSize: 13 }}>Code de vérification (2FA)</h4>
-                <p className="u-muted-sm">Demandez le code reçu sur l&apos;email ou le téléphone associé au compte.</p>
-              </div>
-              {!verificationCodeRequest || verificationCodeRequest.status === "CANCELLED" ? (
-                <RequestVerificationCodeButton purchaseId={purchase.id} />
-              ) : verificationCodeRequest.status === "PENDING" ? (
-                <span className="badge badge-warn">Demande en attente</span>
-              ) : (
-                <div className="access-info-item verification-code-value">
-                  <span className="u-muted-sm">Code fourni</span>
-                  <strong className="mono">{verificationCodeRequest.code}</strong>
-                </div>
-              )}
             </div>
           </div>
 
