@@ -24,7 +24,7 @@ export default async function LandingPage() {
   ]);
 
   const getLandingThumbnail = (product: (typeof products)[number]) => {
-    const imageMedia = product.media.find((m) => m.mediaType !== "VIDEO") ?? product.media[0];
+    const imageMedia = product.media.find((m) => m.mediaType === "IMAGE");
     return imageMedia?.url ? imageMedia : null;
   };
 
