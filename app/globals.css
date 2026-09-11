@@ -22,9 +22,75 @@
 }
 :root[data-theme="light"]{
   --void:#f4f7f3; --void-2:#e7efe9; --void-3:#d7e5dc;
-  --glass:rgba(255,255,255,.78); --glass-2:rgba(255,255,255,.56);
+  --glass:rgba(255,255,255,.82); --glass-2:rgba(244,247,243,.78);
   --glass-border:rgba(28,73,52,.2); --glass-border-soft:rgba(28,73,52,.12);
-  --deep:#1c4934; --ivory:#14231d; --muted:#52665c; --muted-2:#718079;
+  --deep:#1c4934; --ivory:#14231d; --muted:#4c6158; --muted-2:#60756a;
+  --volt:#c9f269; --cyan:#91d7b3;
+}
+:root[data-theme="light"] .logo-text,
+:root[data-theme="light"] .nav-links a,
+:root[data-theme="light"] .hero-copy p,
+:root[data-theme="light"] .trust-item,
+:root[data-theme="light"] .catalogue-header p,
+:root[data-theme="light"] .catalogue-note,
+:root[data-theme="light"] .landing-card-meta h3,
+:root[data-theme="light"] .landing-card-price-row strong,
+:root[data-theme="light"] .landing-total,
+:root[data-theme="light"] .landing-label,
+:root[data-theme="light"] .landing-card-badges span,
+:root[data-theme="light"] .stat-item strong,
+:root[data-theme="light"] .catalogue-header h2,
+:root[data-theme="light"] .landing-buy-btn,
+:root[data-theme="light"] .filter-pill,
+:root[data-theme="light"] .filter-pill.active,
+:root[data-theme="light"] .landing-card-placeholder,
+:root[data-theme="light"] .hero-pill-ghost,
+:root[data-theme="light"] .hero-pill-primary,
+:root[data-theme="light"] .theme-toggle,
+:root[data-theme="light"] .mobile-nav-btn,
+:root[data-theme="light"] .btn-ghost,
+:root[data-theme="light"] .btn-social,
+:root[data-theme="light"] .btn,
+:root[data-theme="light"] .msg-input,
+:root[data-theme="light"] .msg-bubble,
+:root[data-theme="light"] .field input,
+:root[data-theme="light"] .settings-input,
+:root[data-theme="light"] .bo-input,
+:root[data-theme="light"] .bo-textarea,
+:root[data-theme="light"] .bo-select,
+:root[data-theme="light"] .modal textarea,
+:root[data-theme="light"] .notification-trigger,
+:root[data-theme="light"] .verification-code-value strong{
+  color: var(--ivory);
+}
+:root[data-theme="light"] .hero-pill-ghost,
+:root[data-theme="light"] .btn-ghost,
+:root[data-theme="light"] .theme-toggle,
+:root[data-theme="light"] .mobile-nav-btn,
+:root[data-theme="light"] .catalogue-search,
+:root[data-theme="light"] .filter-pill,
+:root[data-theme="light"] .landing-card-badges span,
+:root[data-theme="light"] .landing-card-placeholder,
+:root[data-theme="light"] .field input,
+:root[data-theme="light"] .settings-input,
+:root[data-theme="light"] .bo-input,
+:root[data-theme="light"] .bo-textarea,
+:root[data-theme="light"] .bo-select,
+:root[data-theme="light"] .modal textarea,
+:root[data-theme="light"] .msg-input{
+  background: rgba(255,255,255,.48);
+  border-color: rgba(28,73,52,.15);
+}
+:root[data-theme="light"] .landing-buy-btn{
+  border-color: rgba(28,73,52,.25);
+}
+:root[data-theme="light"] .filter-pill.active{
+  background: var(--void);
+  color: var(--ivory);
+}
+:root[data-theme="light"] .hero-pill-primary,
+:root[data-theme="light"] .btn-primary{
+  color: var(--void);
 }
 *{box-sizing:border-box; margin:0; padding:0;}
 img, video{max-width:100%;}
