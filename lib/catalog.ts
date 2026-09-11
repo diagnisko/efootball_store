@@ -14,6 +14,7 @@ export const getPublicCatalogCached = unstable_cache(
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
       include: {
         media: {
+          where: { mediaType: { not: "VIDEO" } },
           orderBy: [{ isMain: "desc" }, { position: "asc" }],
           take: 1,
         },
