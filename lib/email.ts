@@ -1,8 +1,8 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const EMAIL_FROM = process.env.EMAIL_FROM || "VANTA <no-reply@vanta.app>";
+const EMAIL_FROM = process.env.EMAIL_FROM?.trim() || "Misterdou <no-reply@misterdou.com>";
 
 interface SendEmailInput {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
 }
@@ -19,7 +19,14 @@ interface SendEmailInput {
  */
 export async function sendEmail({ to, subject, html }: SendEmailInput): Promise<{ ok: boolean; skipped: boolean }> {
   if (!RESEND_API_KEY) {
-    console.warn(`[email] RESEND_API_KEY non configuré — email "${subject}" à ${to} non envoyé (notification in-app conservée).`);
+    const recipients = Array.isArray(to) ? to.join(", ") : to;
+    console.warn(`[email] RESEND_API_KEY non configuré — email "${subject}" à ${recipients} non envoyé (notification in-app conservée).`);
+    return { ok: false, skipped: true };
+  }
+
+  const recipients = (Array.isArray(to) ? to : [to]).map((value) => value.trim()).filter(Boolean);
+  if (recipients.length === 0) {
+    console.warn(`[email] Aucun destinataire valide pour "${subject}".`);
     return { ok: false, skipped: true };
   }
 
@@ -30,16 +37,16 @@ export async function sendEmail({ to, subject, html }: SendEmailInput): Promise<
         Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: EMAIL_FROM, to, subject, html }),
+      body: JSON.stringify({ from: EMAIL_FROM, to: recipients, subject, html }),
     });
     if (!res.ok) {
       const body = await res.text().catch(() => res.statusText);
-      console.error(`[email] Échec d'envoi à ${to} ("${subject}") :`, body);
+      console.error(`[email] Échec d'envoi à ${recipients.join(", ")} ("${subject}") :`, body);
       return { ok: false, skipped: false };
     }
     return { ok: true, skipped: false };
   } catch (e) {
-    console.error(`[email] Erreur réseau lors de l'envoi à ${to} :`, e);
+    console.error(`[email] Erreur réseau lors de l'envoi à ${recipients.join(", ")} :`, e);
     return { ok: false, skipped: false };
   }
 }
