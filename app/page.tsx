@@ -23,6 +23,11 @@ export default async function LandingPage() {
     getHomepageHeroImageCached(),
   ]);
 
+  const getLandingThumbnail = (product: (typeof products)[number]) => {
+    const imageMedia = product.media.find((m) => m.mediaType !== "VIDEO") ?? product.media[0];
+    return imageMedia?.url ? imageMedia : null;
+  };
+
   if (isLoggedIn) {
     return (
       <main className="landing-shell landing-shell-compact">
@@ -39,10 +44,11 @@ export default async function LandingPage() {
             {products.map((p) => {
               const status = STATUS_LABEL[p.status] ?? STATUS_LABEL.AVAILABLE;
               const features = (p.features as { ovr?: number; platform?: string }) ?? {};
+              const thumbnail = getLandingThumbnail(p);
               return (
                 <article key={p.id} className="landing-product-card">
                   <div className="landing-card-thumb">
-                    {p.media[0]?.url && <img src={`/api/products/media/${p.media[0].id}`} alt={p.title} />}
+                    {thumbnail?.url ? <img src={thumbnail.url} alt={p.title} /> : <div className="landing-card-placeholder">Image</div>}
                     <span className={`badge ${status.className}`}>{status.label}</span>
                   </div>
 
@@ -170,11 +176,12 @@ export default async function LandingPage() {
             const features = (p.features as { ovr?: number; platform?: string }) ?? {};
             const priceTotal = Number(p.priceTotal);
             const initial = Number(p.initialDepositAmount);
+            const thumbnail = getLandingThumbnail(p);
 
             return (
               <article key={p.id} className="landing-product-card">
                 <div className="landing-card-thumb">
-                  {p.media[0]?.url && <img src={`/api/products/media/${p.media[0].id}`} alt={p.title} />}
+                  {thumbnail?.url ? <img src={thumbnail.url} alt={p.title} /> : <div className="landing-card-placeholder">Image</div>}
                   <span className={`badge ${status.className}`}>{status.label}</span>
                 </div>
 
