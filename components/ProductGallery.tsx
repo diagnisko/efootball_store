@@ -31,7 +31,7 @@ export function ProductGallery({ media }: { media: MediaItem[] }) {
     <div className="product-gallery">
       <div className="product-gallery-main">
         {active.mediaType === "VIDEO" ? (
-          <video className="product-gallery-media" src={active.url} controls playsInline onClick={() => setIsLightboxOpen(true)} />
+          <video className="product-gallery-media" src={active.url} controls playsInline />
         ) : (
           <button type="button" className="product-gallery-expand" onClick={() => setIsLightboxOpen(true)} aria-label="Agrandir l'image">
             <img className="product-gallery-media" src={active.url} alt="" />
