@@ -480,9 +480,13 @@ td.mono{font-family:'JetBrains Mono';}
 .notif-dot.is-unread{background:var(--cyan); box-shadow:0 0 6px var(--cyan);}
 .notif-dot.is-read{background:var(--muted-2); box-shadow:none;}
 .notification-center{position:relative; margin-right:14px;}
-.notification-trigger{position:relative; width:34px; height:34px; border:1px solid var(--bo-border, var(--glass-border-soft)); background:var(--glass); color:var(--bo-accent, var(--volt)); cursor:pointer;}
-.notification-trigger span{font-size:13px;}
+.notification-trigger{position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:1px solid var(--bo-border, var(--glass-border-soft)); background:var(--glass); color:var(--bo-accent, var(--volt)); cursor:pointer; border-radius:50%;}
+.notification-trigger svg{width:16px; height:16px;}
 .notification-trigger b{position:absolute; top:-6px; right:-6px; min-width:17px; height:17px; padding:0 4px; border-radius:9px; background:var(--bo-accent, var(--volt)); color:var(--void); font:700 10px/17px 'DM Sans';}
+.nav-icon-link{position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border:1px solid var(--glass-border-soft); border-radius:50%; color:var(--ivory); background:rgba(255,255,255,.04); text-decoration:none; transition:background .15s, border-color .15s;}
+.nav-icon-link:hover{background:rgba(201,242,105,.08); border-color:var(--volt-soft);}
+.nav-icon-link svg{width:16px; height:16px;}
+.nav-icon-badge{position:absolute; top:-6px; right:-6px; min-width:17px; height:17px; padding:0 4px; display:inline-flex; align-items:center; justify-content:center; border-radius:9px; background:var(--volt); color:var(--void); font:700 10px/17px 'DM Sans';}
 .notification-popover{position:absolute; top:44px; right:0; width:320px; max-width:calc(100vw - 32px); padding:12px; background:var(--bo-surface, var(--void-2)); border:1px solid var(--bo-border, var(--glass-border)); box-shadow:0 18px 40px rgba(0,0,0,.28); z-index:90;}
 .notification-popover-head{display:flex; justify-content:space-between; gap:12px; padding:4px 2px 10px; border-bottom:1px solid var(--bo-border, var(--glass-border-soft));}
 .notification-popover-head strong{font-size:13px;}

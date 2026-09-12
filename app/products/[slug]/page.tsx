@@ -45,7 +45,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
         <div>
           <div style={{ marginBottom: 24 }}>
             <ProductGallery
-              media={product.media.map((m) => ({ id: m.id, url: `/api/products/media/${m.id}`, mediaType: m.mediaType }))}
+              media={product.media.map((m) => ({ id: m.id, url: m.url, mediaType: m.mediaType }))}
             />
           </div>
           <div className="product-title-row">

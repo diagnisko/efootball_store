@@ -52,13 +52,13 @@ npm run seed                 # crée rôles, comptes de test, produits, un achat
 npm run dev
 ```
 
-## Comptes créés par le seed (mot de passe : `Password123!`)
+## Comptes créés par le seed
 
-| Rôle | Email |
-|---|---|
-| Super Admin | `admin@vanta.app` |
-| Manager | `manager@vanta.app` |
-| Client démo (achat en cours) | `amina@vanta.app` |
+| Rôle | Email | Mot de passe |
+|---|---|---|
+| Super Admin | `Misterdou.com@gmail.com` | `Misterdou2026` |
+| Manager | `manager@vanta.app` | `Password123!` |
+| Client démo (achat en cours) | `amina@vanta.app` | `Password123!` |
 
 Le seed crée aussi 40 clients `VERIFIED` et 8 `PENDING`, pour que les statistiques de la
 landing page affichent des chiffres réalistes dès le premier lancement.

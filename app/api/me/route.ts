@@ -16,6 +16,8 @@ export async function PATCH(req: Request) {
     phone?: string;
     country?: string;
     avatarUrl?: string;
+    email?: string;
+    currentPassword?: string;
   };
 
   if (body.firstName !== undefined && !body.firstName.trim()) {
@@ -25,9 +27,32 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Le nom ne peut pas être vide." }, { status: 400 });
   }
 
-  // Volontairement : ni email, ni rôle, ni verificationStatus, ni accountStatus ne sont
-  // acceptés ici, même si le corps de la requête en contient — cette route ne touche qu'aux
-  // informations personnelles non sensibles.
+  const nextEmail = body.email?.trim().toLowerCase();
+  if (nextEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)) {
+    return NextResponse.json({ error: "Adresse email invalide." }, { status: 400 });
+  }
+
+  const currentUser = await prisma.user.findUnique({ where: { id: userId } });
+  if (!currentUser) return NextResponse.json({ error: "Utilisateur introuvable." }, { status: 404 });
+
+  const emailChanging = nextEmail && nextEmail !== currentUser.email.toLowerCase();
+  if (emailChanging) {
+    if (!body.currentPassword) {
+      return NextResponse.json({ error: "Le mot de passe actuel est requis pour changer l'email." }, { status: 400 });
+    }
+    if (!currentUser.passwordHash) {
+      return NextResponse.json({ error: "Ce compte ne possède pas de mot de passe local." }, { status: 400 });
+    }
+    const valid = await bcrypt.compare(body.currentPassword, currentUser.passwordHash);
+    if (!valid) {
+      return NextResponse.json({ error: "Le mot de passe actuel est incorrect." }, { status: 400 });
+    }
+    const existingEmailUser = await prisma.user.findUnique({ where: { email: nextEmail } });
+    if (existingEmailUser && existingEmailUser.id !== userId) {
+      return NextResponse.json({ error: "Cette adresse email est déjà utilisée." }, { status: 409 });
+    }
+  }
+
   const updated = await prisma.user.update({
     where: { id: userId },
     data: {
@@ -36,8 +61,9 @@ export async function PATCH(req: Request) {
       phone: body.phone?.trim() || undefined,
       country: body.country?.trim() || undefined,
       avatarUrl: body.avatarUrl || undefined,
+      email: nextEmail || undefined,
     },
-    select: { firstName: true, lastName: true, phone: true, country: true, avatarUrl: true },
+    select: { firstName: true, lastName: true, phone: true, country: true, avatarUrl: true, email: true },
   });
 
   revalidateTag("nav-user");

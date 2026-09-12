@@ -183,14 +183,18 @@ export function accessInfoReleasedEmail(firstName: string, productTitle: string)
   };
 }
 
-export function verificationCodeProvidedEmail(firstName: string, productTitle: string) {
+export function verificationCodeProvidedEmail(firstName: string, productTitle: string, code?: string | null) {
   return {
-    subject: "Votre code de vérification est disponible",
+    subject: `Code de vérification pour ${productTitle}`,
     html: layout(
-      "Code de vérification disponible",
+      "Code de vérification",
       p(`Bonjour ${firstName},`) +
-        p(`Le code de vérification demandé pour "${productTitle}" est maintenant disponible dans votre dashboard.`) +
-        button("Consulter", `${APP_URL}/dashboard`)
+        p(`Le code de vérification demandé pour "${productTitle}" est disponible.`) +
+        (code
+          ? `<p style="font-size:22px;line-height:1.5;font-weight:700;letter-spacing:2px;color:#ffffff;text-align:center;margin:18px 0;padding:14px 18px;background:#1a1328;border:1px solid rgba(167,139,250,0.5);border-radius:6px;">${code}</p>`
+          : "") +
+        p("Vous pouvez aussi le consulter dans votre dashboard, mais ce message contient le code directement pour une vérification rapide.") +
+        button("Voir mon dashboard", `${APP_URL}/dashboard`)
     ),
   };
 }

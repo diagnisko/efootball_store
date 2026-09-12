@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { AccountMenu } from "@/components/AccountMenu";
 import { MobileNavToggle } from "@/components/MobileNavToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationQuickAccess } from "@/components/NotificationBell";
 import { unstable_cache } from "next/cache";
 
 export const metadata: Metadata = {
@@ -74,7 +75,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <ThemeToggle />
               {currentUser ? (
                 <>
-                  <Link href="/messages" className="btn btn-ghost">Messages</Link>
+                  <NotificationQuickAccess />
                   <AccountMenu
                     name={`${currentUser.firstName} ${currentUser.lastName}`}
                     email={currentUser.email}

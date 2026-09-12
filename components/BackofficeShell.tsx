@@ -42,7 +42,12 @@ export function BackofficeShell({ role, userName, groups, children }: Props) {
       )}
       <aside className={`bo-sidebar${open ? " is-open" : ""}`}>
         <div className="bo-sidebar-head">
-          <Link href="/" className="bo-sidebar-brand">
+          <Link href="/" className="bo-sidebar-brand" onClick={(event) => {
+            if (window.location.pathname.startsWith("/manager") || window.location.pathname.startsWith("/admin")) {
+              event.preventDefault();
+              window.location.assign("/");
+            }
+          }}>
             <div className="logo-mark" />
             <span>VANTA</span>
           </Link>
@@ -68,7 +73,12 @@ export function BackofficeShell({ role, userName, groups, children }: Props) {
           ))}
         </nav>
         <div className="bo-sidebar-foot">
-          <Link href="/">← Retour au site</Link>
+          <Link href="/" onClick={(event) => {
+            if (window.location.pathname.startsWith("/manager") || window.location.pathname.startsWith("/admin")) {
+              event.preventDefault();
+              window.location.assign("/");
+            }
+          }}>← Retour au site</Link>
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
             style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "var(--bo-muted)", fontSize: 12.5 }}

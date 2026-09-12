@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { IconAlertTriangle } from "@/components/Icons";
+import { IconAlertTriangle, IconBell, IconEnvelope } from "@/components/Icons";
 
 type NotificationItem = {
   id: string;
@@ -10,6 +10,7 @@ type NotificationItem = {
   body: string;
   link: string | null;
   isRead: boolean;
+  type?: string;
   createdAt: string;
 };
 
@@ -32,9 +33,8 @@ function playNotificationSound() {
   oscillator.addEventListener("ended", () => void context.close());
 }
 
-export function NotificationBell() {
+function useNotifications() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [open, setOpen] = useState(false);
   const firstLoad = useRef(true);
   const knownUnread = useRef(0);
 
@@ -72,44 +72,63 @@ export function NotificationBell() {
     };
   }, []);
 
+  return notifications;
+}
+
+export function NotificationQuickAccess() {
+  const [open, setOpen] = useState(false);
+  const notifications = useNotifications();
   const unreadCount = notifications.filter((item) => !item.isRead).length;
+  const unreadMessages = notifications.filter((item) => !item.isRead && (item.type === "new_message" || item.link === "/messages")).length;
 
   return (
-    <div className="notification-center">
-      <button
-        className="notification-trigger"
-        type="button"
-        onClick={() => {
-          setOpen((current) => !current);
-          playNotificationSound();
-        }}
-        aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
-        title="Notifications et activer le son"
-      >
-        <span aria-hidden="true">◉</span>
-        {unreadCount > 0 && <b>{unreadCount > 9 ? "9+" : unreadCount}</b>}
-      </button>
-      {open && (
-        <div className="notification-popover">
-          <div className="notification-popover-head">
-            <strong>Notifications</strong>
-            <span>Actualisé automatiquement</span>
-          </div>
-          {notifications.length === 0 && <p className="notification-empty">Aucune notification.</p>}
-          {notifications.slice(0, 6).map((notification) => {
-            const content = (
-              <div className={`notification-entry${notification.isRead ? "" : " is-unread"}`}>
-                <span className="notification-entry-dot">{!notification.isRead && <IconAlertTriangle />}</span>
-                <div>
-                  <strong>{notification.title}</strong>
-                  <p>{notification.body}</p>
+    <div className="notification-actions">
+      <Link href="/messages" className="nav-icon-link" aria-label={`${unreadMessages} message${unreadMessages > 1 ? "s" : ""} non lu${unreadMessages > 1 ? "s" : ""}`}>
+        <IconEnvelope />
+        {unreadMessages > 0 && <span className="nav-icon-badge">{unreadMessages > 9 ? "9+" : unreadMessages}</span>}
+      </Link>
+
+      <div className="notification-center">
+        <button
+          className="notification-trigger"
+          type="button"
+          onClick={() => setOpen((current) => !current)}
+          aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
+          title="Notifications"
+        >
+          <IconBell />
+          {unreadCount > 0 && <b>{unreadCount > 9 ? "9+" : unreadCount}</b>}
+        </button>
+        {open && (
+          <div className="notification-popover">
+            <div className="notification-popover-head">
+              <strong>Notifications</strong>
+              <span>Actualisé automatiquement</span>
+            </div>
+            {notifications.length === 0 && <p className="notification-empty">Aucune notification.</p>}
+            {notifications.slice(0, 6).map((notification) => {
+              const content = (
+                <div className={`notification-entry${notification.isRead ? "" : " is-unread"}`}>
+                  <span className="notification-entry-dot">{!notification.isRead && <IconAlertTriangle />}</span>
+                  <div>
+                    <strong>{notification.title}</strong>
+                    <p>{notification.body}</p>
+                  </div>
                 </div>
-              </div>
-            );
-            return notification.link ? <Link key={notification.id} href={notification.link} onClick={() => setOpen(false)}>{content}</Link> : <div key={notification.id}>{content}</div>;
-          })}
-        </div>
-      )}
+              );
+              return notification.link ? <Link key={notification.id} href={notification.link} onClick={() => setOpen(false)}>{content}</Link> : <div key={notification.id}>{content}</div>;
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
+}
+
+export function NotificationBell() {
+  return <NotificationQuickAccess />;
+}
+
+export function MessageInboxLink() {
+  return <NotificationQuickAccess />;
 }

@@ -12,15 +12,17 @@ async function main() {
   ]);
 
   // ---------- Comptes de test ----------
-  const passwordHash = await bcrypt.hash("Password123!", 12);
+  const adminEmail = process.env.ADMIN_EMAIL ?? "Misterdou.com@gmail.com";
+  const adminPassword = process.env.ADMIN_PASSWORD ?? "Misterdou2026";
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
 
   const superAdmin = await prisma.user.upsert({
-    where: { email: "admin@vanta.app" },
+    where: { email: adminEmail },
     update: {},
     create: {
       firstName: "Admin",
       lastName: "VANTA",
-      email: "admin@vanta.app",
+      email: adminEmail,
       passwordHash,
       roleId: superAdminRole.id,
       verificationStatus: "VERIFIED",
@@ -372,8 +374,8 @@ async function main() {
   }
 
   console.log("Seed terminé.");
-  console.log("Comptes de test (mot de passe: Password123!) :");
-  console.log("  Super Admin : admin@vanta.app");
+  console.log(`Comptes de test (mot de passe: ${adminPassword}) :`);
+  console.log(`  Super Admin : ${adminEmail}`);
   console.log("  Manager     : manager@vanta.app");
   console.log("  Client démo : amina@vanta.app");
   console.log("  Client en retard (pour tester le job) : fatou@vanta.app");

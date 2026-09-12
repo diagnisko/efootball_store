@@ -17,6 +17,7 @@ interface Props {
 export function AccountForm(props: Props) {
   const [firstName, setFirstName] = useState(props.firstName);
   const [lastName, setLastName] = useState(props.lastName);
+  const [email, setEmail] = useState(props.email);
   const [phone, setPhone] = useState(props.phone);
   const [country, setCountry] = useState(props.country);
   const [avatarUrl, setAvatarUrl] = useState(props.avatarUrl);
@@ -29,6 +30,7 @@ export function AccountForm(props: Props) {
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [profilePassword, setProfilePassword] = useState("");
   const [pwSaving, setPwSaving] = useState(false);
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSaved, setPwSaved] = useState(false);
@@ -62,13 +64,26 @@ export function AccountForm(props: Props) {
     setSaved(false);
     setError(null);
     try {
+      if (email !== props.email && !profilePassword) {
+        throw new Error("Le mot de passe actuel est requis pour changer l'email.");
+      }
+
       const res = await fetch("/api/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, phone, country, avatarUrl: avatarUrl ?? undefined }),
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          phone,
+          country,
+          avatarUrl: avatarUrl ?? undefined,
+          email,
+          currentPassword: email !== props.email ? profilePassword : undefined,
+        }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
       setSaved(true);
+      setProfilePassword("");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur.");
@@ -144,10 +159,19 @@ export function AccountForm(props: Props) {
 
         <div className="u-mb-5">
           <label className="settings-label">Email</label>
-          <input className="settings-input" value={props.email} disabled />
-          <p className="settings-hint">
-            L&apos;adresse email n&apos;est pas modifiable ici — contactez le support si besoin.
-          </p>
+          <input className="settings-input" value={email} onChange={(e) => setEmail(e.target.value)} />
+          {email !== props.email && (
+            <div style={{ marginTop: 10 }}>
+              <label className="settings-label">Mot de passe actuel pour valider le changement</label>
+              <input
+                type="password"
+                className="settings-input"
+                value={profilePassword}
+                onChange={(e) => setProfilePassword(e.target.value)}
+                placeholder="Saisissez votre mot de passe actuel"
+              />
+            </div>
+          )}
         </div>
 
         {error && <p className="settings-error">{error}</p>}

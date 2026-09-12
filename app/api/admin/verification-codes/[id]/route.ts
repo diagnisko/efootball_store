@@ -78,7 +78,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   if (decision === "provide") {
     await sendEmail({
       to: request.purchase.user.email,
-      ...verificationCodeProvidedEmail(request.purchase.user.firstName, request.purchase.product.title),
+      ...verificationCodeProvidedEmail(request.purchase.user.firstName, request.purchase.product.title, code?.trim() || request.code),
     });
   }
 
