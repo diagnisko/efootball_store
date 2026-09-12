@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
 import type { Capability } from "@/lib/permissions";
 
@@ -49,11 +48,13 @@ export function ManagerPermissionsGrid({
   managerId: string;
   granted: Record<string, boolean>;
 }) {
+  const [values, setValues] = useState<Record<string, boolean>>(granted);
   const [pending, setPending] = useState<string | null>(null);
-  const router = useRouter();
   const toast = useToast();
 
   async function toggle(capability: Capability, next: boolean) {
+    const previous = !!values[capability];
+    setValues((current) => ({ ...current, [capability]: next }));
     setPending(capability);
     try {
       const res = await fetch(`/api/admin/managers/${managerId}/permissions`, {
@@ -62,8 +63,8 @@ export function ManagerPermissionsGrid({
         body: JSON.stringify({ capability, granted: next }),
       });
       if (!res.ok) throw new Error();
-      router.refresh();
     } catch {
+      setValues((current) => ({ ...current, [capability]: previous }));
       toast.error("Une erreur est survenue.");
     } finally {
       setPending(null);
@@ -79,7 +80,7 @@ export function ManagerPermissionsGrid({
         >
           <input
             type="checkbox"
-            checked={!!granted[cap]}
+            checked={!!values[cap]}
             disabled={pending === cap}
             onChange={(e) => toggle(cap, e.target.checked)}
           />

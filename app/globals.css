@@ -1278,7 +1278,7 @@ body:has(.bo-shell){ background:var(--bo-bg); }
 .bo-code{ font-family:'JetBrains Mono'; font-size:11px; color:var(--bo-muted); background:var(--bo-panel-2); padding:2px 6px; border-radius:3px; }
 
 @media(max-width:1080px){
-  .bo-sidebar{ position:fixed; left:0; top:0; bottom:0; z-index:80; width:min(82vw, 300px); transform:translateX(-105%); transition:transform .24s ease; box-shadow:20px 0 40px rgba(0,0,0,.5); }
+  .bo-sidebar{ position:fixed; left:0; top:0; bottom:0; z-index:80; width:min(82vw, 280px); transform:translateX(-105%); transition:transform .24s ease; box-shadow:20px 0 40px rgba(0,0,0,.5); }
   .bo-sidebar.is-open{ transform:translateX(0); }
   .bo-topbar{ padding:14px 18px; }
   .bo-content{ padding:20px 18px 50px; }
@@ -1293,7 +1293,7 @@ body:has(.bo-shell){ background:var(--bo-bg); }
   .bo-topbar-user{ display:none; }
 }
 @media(max-width:420px){
-  .bo-sidebar{ width:min(88vw, 292px); }
+  .bo-sidebar{ width:min(88vw, 280px); }
   .bo-sidebar-head{ padding:18px 16px 14px; }
   .bo-nav{ padding:12px 10px; }
   .bo-nav-group{ margin-bottom:14px; }
