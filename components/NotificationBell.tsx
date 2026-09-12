@@ -40,6 +40,18 @@ export function NotificationBell() {
 
   useEffect(() => {
     let active = true;
+
+    const ensureNotificationsPermission = async () => {
+      if (!("Notification" in window)) return;
+      if (Notification.permission === "granted") return;
+      if (Notification.permission === "denied") return;
+      try {
+        await Notification.requestPermission();
+      } catch {
+        // ignore browser restrictions
+      }
+    };
+
     const loadNotifications = async () => {
       const response = await fetch("/api/notifications", { cache: "no-store" });
       if (!response.ok || !active) return;
@@ -51,6 +63,7 @@ export function NotificationBell() {
       setNotifications(result.notifications);
     };
 
+    void ensureNotificationsPermission();
     void loadNotifications();
     const interval = window.setInterval(() => void loadNotifications(), 30000);
     return () => {

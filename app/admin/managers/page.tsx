@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ManagerPermissionsGrid } from "@/components/ManagerPermissionsGrid";
+import { AdminManagersPanel } from "@/components/AdminManagersPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,14 @@ export default async function AdminManagersPage() {
     orderBy: { firstName: "asc" },
   });
 
+  const initialManagers = managers.map((m) => ({
+    id: m.id,
+    firstName: m.firstName,
+    lastName: m.lastName,
+    email: m.email,
+    createdAt: m.createdAt.toISOString(),
+  }));
+
   return (
     <div>
       <div className="bo-page-header">
@@ -19,9 +28,9 @@ export default async function AdminManagersPage() {
         </div>
       </div>
 
-      {managers.length === 0 && <div className="bo-panel bo-panel-pad"><div className="bo-empty">Aucun manager pour le moment.</div></div>}
+      <AdminManagersPanel initialManagers={initialManagers} />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 28 }}>
         {managers.map((m) => {
           const granted: Record<string, boolean> = {};
           m.managerPermissions.forEach((p) => { granted[p.capability] = p.granted; });
