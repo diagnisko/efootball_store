@@ -29,6 +29,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ...(permissions.send_access_info ? [{ href: "/manager/verification-codes", label: "Codes de vérification" }] : []),
           ...(permissions.reply_messages ? [{ href: "/manager/messages", label: "Messages" }] : []),
           ...(permissions.view_clients ? [{ href: "/admin/clients", label: "Clients" }] : []),
+          ...(permissions.send_access_info ? [{ href: "/admin/purchases", label: "Infos d'accès" }] : []),
           ...(permissions.manage_offers ? [{ href: "/admin/products", label: "Offres" }] : []),
           ...(permissions.view_statistics ? [{ href: "/admin/dashboard", label: "Statistiques" }] : []),
         ],

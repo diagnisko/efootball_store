@@ -31,6 +31,7 @@ export default async function ManagerLayout({ children }: { children: React.Reac
           items: [
             ...baseManagerLinks.filter((item) => !!managerCapabilities?.[item.capability as keyof typeof managerCapabilities]),
             ...(managerCapabilities?.view_clients ? [{ href: "/admin/clients", label: "Clients" }] : []),
+            ...(managerCapabilities?.send_access_info ? [{ href: "/admin/purchases", label: "Infos d'accès" }] : []),
             ...(managerCapabilities?.manage_offers ? [{ href: "/admin/products", label: "Offres" }] : []),
             ...(managerCapabilities?.view_statistics ? [{ href: "/admin/dashboard", label: "Statistiques" }] : []),
           ],
