@@ -4,6 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import AppleProvider from "next-auth/providers/apple";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
+import { getManagerCapabilities } from "@/lib/permissions";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt", maxAge: 60 * 60 * 8 }, // 8h
@@ -116,6 +117,14 @@ export const authOptions: NextAuthOptions = {
           token.sub = dbUser.id;
         }
       }
+
+      if (token.sub && token.role === "MANAGER") {
+        const permissions = await getManagerCapabilities(token.sub as string);
+        token.permissions = permissions;
+      } else if (token.role !== "MANAGER") {
+        token.permissions = {};
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -124,6 +133,8 @@ export const authOptions: NextAuthOptions = {
         (session.user as { role?: string }).role = token.role as string;
         (session.user as { verificationStatus?: string }).verificationStatus =
           token.verificationStatus as string;
+        (session.user as { permissions?: Record<string, boolean> }).permissions =
+          (token.permissions as Record<string, boolean>) ?? {};
       }
       return session;
     },
