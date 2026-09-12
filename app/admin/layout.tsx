@@ -3,11 +3,11 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { BackofficeShell } from "@/components/BackofficeShell";
 import { ADMIN_NAV_GROUPS } from "@/lib/backoffice-nav";
+import { getManagerCapabilities } from "@/lib/permissions";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
   const role = (session?.user as { role?: string } | undefined)?.role;
-  const permissions = ((session?.user as { permissions?: Record<string, boolean> } | undefined)?.permissions ?? {}) as Record<string, boolean>;
 
   if (role === "SUPER_ADMIN") {
     const name = session?.user?.name ?? "Administrateur";
@@ -18,7 +18,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     );
   }
 
-  if (role === "MANAGER" && Object.values(permissions).some(Boolean)) {
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  const permissions = role === "MANAGER" && userId ? await getManagerCapabilities(userId) : null;
+
+  if (role === "MANAGER" && permissions && Object.values(permissions).some(Boolean)) {
     const name = session?.user?.name ?? "Manager";
     const managerGroups = [
       {
