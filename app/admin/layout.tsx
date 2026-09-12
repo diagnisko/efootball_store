@@ -22,16 +22,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     const name = session?.user?.name ?? "Manager";
     const managerGroups = [
       {
-        label: "Clients",
-        items: permissions.view_clients ? [{ href: "/admin/clients", label: "Clients" }] : [],
-      },
-      {
-        label: "Commerce",
-        items: permissions.manage_offers ? [{ href: "/admin/products", label: "Offres" }] : [],
-      },
-      {
-        label: "Pilotage",
-        items: permissions.view_statistics ? [{ href: "/admin/dashboard", label: "Statistiques" }] : [],
+        label: "Navigation",
+        items: [
+          ...(permissions.verify_identity ? [{ href: "/manager/verifications", label: "Vérifications" }] : []),
+          ...(permissions.confirm_payment ? [{ href: "/manager/payments", label: "Paiements" }] : []),
+          ...(permissions.send_access_info ? [{ href: "/manager/verification-codes", label: "Codes de vérification" }] : []),
+          ...(permissions.reply_messages ? [{ href: "/manager/messages", label: "Messages" }] : []),
+          ...(permissions.view_clients ? [{ href: "/admin/clients", label: "Clients" }] : []),
+          ...(permissions.manage_offers ? [{ href: "/admin/products", label: "Offres" }] : []),
+          ...(permissions.view_statistics ? [{ href: "/admin/dashboard", label: "Statistiques" }] : []),
+        ],
       },
     ].filter((group) => group.items.length > 0);
 

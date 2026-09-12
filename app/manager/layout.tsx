@@ -27,18 +27,14 @@ export default async function ManagerLayout({ children }: { children: React.Reac
     ? ADMIN_NAV_GROUPS
     : [
         {
-          label: "File d'attente",
-          items: baseManagerLinks.filter((item) => !!managerCapabilities?.[item.capability as keyof typeof managerCapabilities]).map(({ href, label }) => ({ href, label })),
+          label: "Navigation",
+          items: [
+            ...baseManagerLinks.filter((item) => !!managerCapabilities?.[item.capability as keyof typeof managerCapabilities]),
+            ...(managerCapabilities?.view_clients ? [{ href: "/admin/clients", label: "Clients" }] : []),
+            ...(managerCapabilities?.manage_offers ? [{ href: "/admin/products", label: "Offres" }] : []),
+            ...(managerCapabilities?.view_statistics ? [{ href: "/admin/dashboard", label: "Statistiques" }] : []),
+          ],
         },
-        ...(managerCapabilities?.view_clients
-          ? [{ label: "Clients", items: [{ href: "/admin/clients", label: "Clients" }] }]
-          : []),
-        ...(managerCapabilities?.manage_offers
-          ? [{ label: "Commerce", items: [{ href: "/admin/products", label: "Offres" }] }]
-          : []),
-        ...(managerCapabilities?.view_statistics
-          ? [{ label: "Pilotage", items: [{ href: "/admin/dashboard", label: "Statistiques" }] }]
-          : []),
       ];
 
   return (
