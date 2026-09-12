@@ -9,6 +9,7 @@ import { AccountMenu } from "@/components/AccountMenu";
 import { MobileNavToggle } from "@/components/MobileNavToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationQuickAccess } from "@/components/NotificationBell";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { unstable_cache } from "next/cache";
 
 export const metadata: Metadata = {
@@ -101,6 +102,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </div>
           </nav>
           {children}
+          <SpeedInsights />
         </Providers>
       </body>
     </html>
