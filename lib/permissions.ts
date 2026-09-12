@@ -37,6 +37,39 @@ export const CAPABILITY_LABELS: Record<Capability, string> = {
   view_statistics: "Voir les statistiques",
 };
 
+export const SECTION_CAPABILITY_MAP: Record<string, Capability> = {
+  "/admin/dashboard": "view_statistics",
+  "/admin/clients": "view_clients",
+  "/admin/purchases": "send_access_info",
+  "/admin/products": "manage_offers",
+  "/admin/managers": "manage_managers",
+  "/admin/settings": "manage_platform_settings",
+  "/manager/verifications": "verify_identity",
+  "/manager/payments": "confirm_payment",
+  "/manager/verification-codes": "send_access_info",
+  "/manager/messages": "reply_messages",
+};
+
+export function canAccessBackofficeSection(
+  role: string | undefined,
+  userId: string | undefined,
+  pathname: string,
+  granted: Partial<Record<Capability, boolean>> = {}
+): boolean {
+  if (!role || !userId) return false;
+  if (role === "SUPER_ADMIN") return true;
+  if (role !== "MANAGER") return false;
+
+  const normalized = pathname.split("?")[0].split("#")[0];
+  const match = Object.entries(SECTION_CAPABILITY_MAP).find(([prefix]) => normalized === prefix || normalized.startsWith(`${prefix}/`));
+
+  if (!match) {
+    return normalized.startsWith("/manager") || normalized.startsWith("/admin");
+  }
+
+  return !!granted[match[1]];
+}
+
 /**
  * Vérifie côté serveur si un utilisateur peut exécuter une action donnée.
  * SUPER_ADMIN a toujours toutes les capacités. MANAGER dépend de la table

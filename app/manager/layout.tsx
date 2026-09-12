@@ -16,23 +16,19 @@ export default async function ManagerLayout({ children }: { children: React.Reac
 
   const managerCapabilities = userId && !isAdmin ? await getManagerCapabilities(userId) : null;
 
+  const baseManagerLinks = [
+    { href: "/manager/verifications", label: "Vérifications", capability: "verify_identity" },
+    { href: "/manager/payments", label: "Paiements", capability: "confirm_payment" },
+    { href: "/manager/verification-codes", label: "Codes de vérification", capability: "send_access_info" },
+    { href: "/manager/messages", label: "Messages", capability: "reply_messages" },
+  ];
+
   const groups = isAdmin
     ? ADMIN_NAV_GROUPS
     : [
         {
           label: "File d'attente",
-          items: [
-            { href: "/manager/verifications", label: "Vérifications" },
-            { href: "/manager/payments", label: "Paiements" },
-            { href: "/manager/verification-codes", label: "Codes de vérification" },
-            { href: "/manager/messages", label: "Messages" },
-          ].filter((item) => {
-            if (item.href === "/manager/messages") return true;
-            if (item.href === "/manager/verifications") return true;
-            if (item.href === "/manager/payments") return true;
-            if (item.href === "/manager/verification-codes") return true;
-            return false;
-          }),
+          items: baseManagerLinks.filter((item) => !!managerCapabilities?.[item.capability as keyof typeof managerCapabilities]).map(({ href, label }) => ({ href, label })),
         },
         ...(managerCapabilities?.view_clients
           ? [{ label: "Clients", items: [{ href: "/admin/clients", label: "Clients" }] }]

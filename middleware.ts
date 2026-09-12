@@ -1,17 +1,25 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { getManagerCapabilities, canAccessBackofficeSection } from "@/lib/permissions";
 
 export default withAuth(
-  function middleware(req) {
+  async function middleware(req) {
     const { pathname } = req.nextUrl;
     const role = req.nextauth.token?.role as string | undefined;
+    const userId = req.nextauth.token?.sub as string | undefined;
 
-    if (pathname.startsWith("/admin") && role !== "SUPER_ADMIN") {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
+    if (pathname.startsWith("/admin") || pathname.startsWith("/manager")) {
+      if (role === "SUPER_ADMIN") {
+        return NextResponse.next();
+      }
+
+      const managerCapabilities = role === "MANAGER" && userId ? await getManagerCapabilities(userId) : {};
+      const allowed = canAccessBackofficeSection(role, userId, pathname, managerCapabilities);
+      if (!allowed) {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
     }
-    if (pathname.startsWith("/manager") && !["SUPER_ADMIN", "MANAGER"].includes(role ?? "")) {
-      return NextResponse.redirect(new URL("/dashboard", req.url));
-    }
+
     return NextResponse.next();
   },
   {
