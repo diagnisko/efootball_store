@@ -20,8 +20,23 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (role === "MANAGER" && Object.values(permissions).some(Boolean)) {
     const name = session?.user?.name ?? "Manager";
+    const managerGroups = [
+      {
+        label: "Clients",
+        items: permissions.view_clients ? [{ href: "/admin/clients", label: "Clients" }] : [],
+      },
+      {
+        label: "Commerce",
+        items: permissions.manage_offers ? [{ href: "/admin/products", label: "Offres" }] : [],
+      },
+      {
+        label: "Pilotage",
+        items: permissions.view_statistics ? [{ href: "/admin/dashboard", label: "Statistiques" }] : [],
+      },
+    ].filter((group) => group.items.length > 0);
+
     return (
-      <BackofficeShell role="MANAGER" userName={name} groups={[]}> 
+      <BackofficeShell role="MANAGER" userName={name} groups={managerGroups}>
         {children}
       </BackofficeShell>
     );
