@@ -13,6 +13,11 @@ import { unstable_cache } from "next/cache";
 export const metadata: Metadata = {
   title: "VANTA — Comptes eFootball vérifiés",
   description: "Plateforme premium de vente de comptes eFootball Mobile avec paiement échelonné.",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 // Cette requête s'exécute au chargement de CHAQUE page (elle vit dans le layout racine).
@@ -40,6 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="fr">
       <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
