@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/Toast";
+import { ManagerPermissionsGrid } from "@/components/ManagerPermissionsGrid";
 
 type Manager = {
   id: string;
@@ -10,6 +11,7 @@ type Manager = {
   lastName: string;
   email: string;
   createdAt: string;
+  granted: Record<string, boolean>;
 };
 
 export function AdminManagersPanel({ initialManagers }: { initialManagers: Manager[] }) {
@@ -20,6 +22,7 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
   const [creating, setCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [openPermissionsId, setOpenPermissionsId] = useState<string | null>(null);
 
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -35,7 +38,7 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
       const json = (await res.json().catch(() => ({}))) as { error?: string; manager?: Manager };
       if (!res.ok || !json.manager) throw new Error(json.error || "Impossible de créer le manager.");
 
-      setManagers((current) => [json.manager!, ...current]);
+      setManagers((current) => [{ ...json.manager!, granted: {} }, ...current]);
       setForm({ firstName: "", lastName: "", email: "", password: "" });
       setShowCreate(false);
       toast.success("Compte manager créé.");
@@ -117,7 +120,7 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
 
         {managers.map((manager) => (
           <div key={manager.id} className="manager-card" style={{ display: "grid", gap: 14 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14 }}>
+            <div className="manager-card-head">
               <div>
                 <div className="manager-avatar">{manager.firstName[0]}{manager.lastName[0]}</div>
                 <div style={{ marginTop: 10 }}>
@@ -128,16 +131,15 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
                 </div>
               </div>
 
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <div className="manager-card-actions">
                 <button
                   type="button"
                   className="bo-btn bo-btn-sm"
                   onClick={() => {
-                    const section = document.getElementById(`manager-permissions-${manager.id}`);
-                    section?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    setOpenPermissionsId((current) => current === manager.id ? null : manager.id);
                   }}
                 >
-                  Gérer
+                  {openPermissionsId === manager.id ? "Fermer" : "Gérer"}
                 </button>
                 <button
                   type="button"
@@ -154,6 +156,19 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
               <span>Compte manager</span>
               <strong>{new Date(manager.createdAt).toLocaleDateString("fr-FR")}</strong>
             </div>
+
+            {openPermissionsId === manager.id && (
+              <div className="manager-card-permissions">
+                <div className="manager-card-permissions-head">
+                  <div>
+                    <h3>Permissions</h3>
+                    <span className="mono">{manager.email}</span>
+                  </div>
+                  <span className="manager-permissions-hint">Modifications enregistrées automatiquement</span>
+                </div>
+                <ManagerPermissionsGrid managerId={manager.id} granted={manager.granted} />
+              </div>
+            )}
           </div>
         ))}
       </div>
