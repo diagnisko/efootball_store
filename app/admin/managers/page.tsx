@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminManagersPage() {
   const managers = await prisma.user.findMany({
-    where: { role: { name: "MANAGER" } },
+    where: { role: { name: "MANAGER" }, accountStatus: { not: "CANCELLED" } },
     include: { managerPermissions: true },
     orderBy: { firstName: "asc" },
   });
@@ -30,17 +30,19 @@ export default async function AdminManagersPage() {
 
       <AdminManagersPanel initialManagers={initialManagers} />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 28 }}>
+      <div className="manager-permissions-stack">
         {managers.map((m) => {
           const granted: Record<string, boolean> = {};
           m.managerPermissions.forEach((p) => { granted[p.capability] = p.granted; });
           return (
-            <div key={m.id} className="bo-section">
+            <div key={m.id} id={`manager-permissions-${m.id}`} className="bo-section manager-permission-panel">
               <div className="bo-section-head">
-                <h3 style={{ textTransform: "none", fontSize: 14, color: "var(--bo-text)", fontFamily: "'Manrope'", fontWeight: 700 }}>
-                  {m.firstName} {m.lastName}
-                </h3>
-                <span className="mono" style={{ fontSize: 12, color: "var(--bo-muted)" }}>{m.email}</span>
+                <div>
+                  <h3 style={{ textTransform: "none", fontSize: 14, color: "var(--bo-text)", fontFamily: "'Manrope'", fontWeight: 700, margin: 0 }}>
+                    Permissions — {m.firstName} {m.lastName}
+                  </h3>
+                  <span className="mono" style={{ display: "block", marginTop: 4, fontSize: 12, color: "var(--bo-muted)" }}>{m.email}</span>
+                </div>
               </div>
               <ManagerPermissionsGrid managerId={m.id} granted={granted} />
             </div>

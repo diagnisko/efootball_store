@@ -13,6 +13,12 @@ const VALID_CAPABILITIES: Capability[] = [
   "confirm_payment",
   "reject_payment",
   "manage_offers",
+  "delete_offers",
+  "suspend_client",
+  "delete_client",
+  "cancel_contract",
+  "manage_platform_settings",
+  "send_access_info",
   "reply_messages",
   "view_statistics",
 ];

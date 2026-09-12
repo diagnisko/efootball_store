@@ -32,7 +32,12 @@ const EDITABLE: Capability[] = [
   "confirm_payment",
   "reject_payment",
   "manage_offers",
+  "delete_offers",
+  "suspend_client",
   "delete_client",
+  "cancel_contract",
+  "manage_platform_settings",
+  "send_access_info",
   "reply_messages",
   "view_statistics",
 ];
@@ -66,21 +71,11 @@ export function ManagerPermissionsGrid({
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 10 }}>
+    <div className="manager-permissions-grid">
       {EDITABLE.map((cap) => (
         <label
           key={cap}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            fontSize: 13,
-            padding: "8px 10px",
-            background: "var(--bo-panel-2)",
-            border: "1px solid var(--bo-border-soft)",
-            borderRadius: 4,
-            cursor: pending ? "wait" : "pointer",
-          }}
+          className={`manager-permission-item ${pending === cap ? "is-pending" : ""}`}
         >
           <input
             type="checkbox"
@@ -88,7 +83,7 @@ export function ManagerPermissionsGrid({
             disabled={pending === cap}
             onChange={(e) => toggle(cap, e.target.checked)}
           />
-          {LABELS[cap]}
+          <span>{LABELS[cap]}</span>
         </label>
       ))}
     </div>

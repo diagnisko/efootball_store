@@ -23,8 +23,10 @@ export default async function DashboardPage() {
   if (!session?.user) redirect("/login");
 
   const userId = (session.user as { id: string }).id;
+  const role = (session.user as { role?: string }).role;
+  const isStaffUser = role === "MANAGER" || role === "SUPER_ADMIN";
 
-  const [user, purchase, notifications, notificationsTotal, accessInfo, conversation, verificationCodeRequest] = await Promise.all([
+  const [user, purchase, accessInfo, conversation, verificationCodeRequest] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
     prisma.purchase.findFirst({
       where: { userId, status: { in: ["AWAITING_DEPOSIT", "ACTIVE", "COMPLETED"] } },
@@ -34,12 +36,6 @@ export default async function DashboardPage() {
       },
       orderBy: { createdAt: "desc" },
     }),
-    prisma.notification.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
-    prisma.notification.count({ where: { userId } }),
     prisma.accessInformation.findMany({
       where: { visibleToClient: true, purchase: { userId, status: { in: ["ACTIVE", "COMPLETED"] } } },
       include: { purchase: { include: { product: true } } },
@@ -80,7 +76,7 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {user.verificationStatus !== "VERIFIED" && (
+      {!isStaffUser && user.verificationStatus !== "VERIFIED" && (
         <div className="panel card u-mb-5" style={{ borderColor: "var(--warn)" }}>
           <h3>Vérification requise</h3>
           <p className="u-muted">
@@ -307,31 +303,6 @@ export default async function DashboardPage() {
           ))}
         </div>
       )}
-
-      <div className="panel card">
-        <div className="card-head">
-          <h3>Notifications</h3>
-          {notificationsTotal > notifications.length && (
-            <span className="u-muted-sm">
-              {notifications.length} plus récentes sur {notificationsTotal}
-            </span>
-          )}
-        </div>
-        {notifications.length === 0 && <p className="u-muted">Rien de nouveau pour l&apos;instant.</p>}
-        {notifications.map((n) => (
-          <div className="notif-item" key={n.id}>
-            <div className={`notif-dot ${n.isRead ? "is-read" : "is-unread"}`} />
-            <div>
-              <p>{n.body}</p>
-              <div className="time">
-                {new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(
-                  n.createdAt
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

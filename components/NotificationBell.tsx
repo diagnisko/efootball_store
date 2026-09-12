@@ -72,14 +72,44 @@ function useNotifications() {
     };
   }, []);
 
-  return notifications;
+  return { notifications, setNotifications };
 }
 
 export function NotificationQuickAccess() {
   const [open, setOpen] = useState(false);
-  const notifications = useNotifications();
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const { notifications, setNotifications } = useNotifications();
   const unreadCount = notifications.filter((item) => !item.isRead).length;
   const unreadMessages = notifications.filter((item) => !item.isRead && (item.type === "new_message" || item.link === "/messages")).length;
+
+  const updateNotificationReadState = async (ids: string[]) => {
+    if (!ids.length) return;
+    const payload = { ids, markRead: true };
+    await fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    setNotifications((current) => current.map((item) => (ids.includes(item.id) ? { ...item, isRead: true } : item)));
+    setSelectedIds((current) => current.filter((id) => !ids.includes(id)));
+  };
+
+  const deleteSelectedNotifications = async () => {
+    if (!selectedIds.length) return;
+    await fetch("/api/notifications", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: selectedIds }),
+    });
+    setNotifications((current) => current.filter((item) => !selectedIds.includes(item.id)));
+    setSelectedIds([]);
+    setSelectionMode(false);
+  };
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id]);
+  };
 
   return (
     <div className="notification-actions">
@@ -103,12 +133,35 @@ export function NotificationQuickAccess() {
           <div className="notification-popover">
             <div className="notification-popover-head">
               <strong>Notifications</strong>
-              <span>Actualisé automatiquement</span>
+              <div className="notification-toolbar">
+                <button type="button" className="notification-select-toggle" onClick={() => setSelectionMode((current) => !current)}>
+                  {selectionMode ? "Annuler" : "Sélectionner"}
+                </button>
+                {selectedIds.length > 0 && (
+                  <>
+                    <button type="button" className="notification-action-btn" onClick={() => void updateNotificationReadState(selectedIds)}>
+                      Marquer lu
+                    </button>
+                    <button type="button" className="notification-action-btn danger" onClick={() => void deleteSelectedNotifications()}>
+                      Masquer
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
             {notifications.length === 0 && <p className="notification-empty">Aucune notification.</p>}
             {notifications.slice(0, 6).map((notification) => {
               const content = (
-                <div className={`notification-entry${notification.isRead ? "" : " is-unread"}`}>
+                <div className={`notification-entry${notification.isRead ? "" : " is-unread"}${selectedIds.includes(notification.id) ? " selected" : ""}`}>
+                  {selectionMode && (
+                    <label className="notification-select-box" onClick={(event) => event.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(notification.id)}
+                        onChange={() => toggleSelection(notification.id)}
+                      />
+                    </label>
+                  )}
                   <span className="notification-entry-dot">{!notification.isRead && <IconAlertTriangle />}</span>
                   <div>
                     <strong>{notification.title}</strong>
@@ -116,7 +169,38 @@ export function NotificationQuickAccess() {
                   </div>
                 </div>
               );
-              return notification.link ? <Link key={notification.id} href={notification.link} onClick={() => setOpen(false)}>{content}</Link> : <div key={notification.id}>{content}</div>;
+
+              if (notification.link) {
+                return (
+                  <Link
+                    key={notification.id}
+                    href={notification.link}
+                    onClick={async () => {
+                      if (selectionMode || notification.isRead) {
+                        return;
+                      }
+                      setOpen(false);
+                      await updateNotificationReadState([notification.id]);
+                    }}
+                  >
+                    {content}
+                  </Link>
+                );
+              }
+
+              return (
+                <button
+                  key={notification.id}
+                  type="button"
+                  className="notification-entry-button"
+                  onClick={async () => {
+                    if (selectionMode) return;
+                    await updateNotificationReadState([notification.id]);
+                  }}
+                >
+                  {content}
+                </button>
+              );
             })}
           </div>
         )}

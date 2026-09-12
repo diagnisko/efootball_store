@@ -73,15 +73,15 @@ export default function VerificationPage() {
 
   return (
     <div className="auth-wrap">
-      <div className="panel auth-card" style={{ width: 480 }}>
+      <div className="panel auth-card verification-shell" style={{ width: 480 }}>
         {step < 4 && (
-          <div style={{ marginBottom: 28 }}>
-            <div className="rail" style={{ marginBottom: 8 }}>
+          <div className="verification-stepper">
+            <div className="rail verification-rail" style={{ marginBottom: 8 }}>
               {[1, 2, 3].map((s) => (
                 <div key={s} className={`rail-seg ${s < step ? "filled" : s === step ? "current" : ""}`} />
               ))}
             </div>
-            <div style={{ fontSize: 11, color: "var(--muted-2)", fontFamily: "'JetBrains Mono'", letterSpacing: ".05em", textTransform: "uppercase" }}>
+            <div className="verification-step-label">
               Étape {step} sur 3 — {STEP_LABELS[step - 1]}
             </div>
           </div>
@@ -90,10 +90,23 @@ export default function VerificationPage() {
         {/* ---------- Étape 1 : Bienvenue ---------- */}
         {step === 1 && (
           <>
-            <div className="auth-title">Bienvenue dans l&apos;univers VANTA{firstName ? `, ${firstName}` : ""}</div>
+            <div className="verification-hero">
+              <div className="verification-hero-badge">VANTA</div>
+              <div className="auth-title">Bienvenue dans l&apos;univers VANTA{firstName ? `, ${firstName}` : ""}</div>
+            </div>
             <div className="auth-sub">
-              Avant de pouvoir acheter un compte, deux courtes étapes : compléter votre profil,
-              puis vérifier votre identité. Ça prend moins de deux minutes.
+              Avant de pouvoir acheter un compte, deux étapes simples : complétez votre profil,
+              puis vérifiez votre identité. Ça prend moins de deux minutes.
+            </div>
+            <div className="verification-card-list">
+              <div className="verification-card-item">
+                <strong>1</strong>
+                <span>Compléter le profil</span>
+              </div>
+              <div className="verification-card-item">
+                <strong>2</strong>
+                <span>Soumettre les documents</span>
+              </div>
             </div>
             <button className="btn btn-primary btn-block" onClick={() => setStep(2)}>
               Commencer
@@ -114,7 +127,7 @@ export default function VerificationPage() {
               <input type="text" placeholder=" " required value={country} onChange={(e) => setCountry(e.target.value)} />
               <label>Pays</label>
             </div>
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+            <div className="verification-submit-actions">
               <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setStep(1)}>Retour</button>
               <button
                 className="btn btn-primary"
@@ -164,37 +177,39 @@ export default function VerificationPage() {
               </select>
             </div>
 
-            <div className="u-mb-5">
-              <label className="settings-label">Document (recto)</label>
-              <input
-                type="file"
-                accept="image/*,.pdf"
-                onChange={(e) => handleFileChange(e, "front")}
-                disabled={uploading}
-                className="u-muted"
-              />
-              {uploading && <p className="settings-hint" style={{ color: "var(--cyan)" }}>Envoi en cours...</p>}
-              {frontKey && !uploading && (
-                <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Document envoyé et prêt à être soumis.</p>
-              )}
-              {uploadError && <p className="settings-error">{uploadError}</p>}
+            <div className="verification-upload-grid">
+              <div className="verification-upload-box">
+                <label className="settings-label">Document (recto)</label>
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => handleFileChange(e, "front")}
+                  disabled={uploading}
+                  className="u-muted"
+                />
+                {uploading && <p className="settings-hint" style={{ color: "var(--cyan)" }}>Envoi en cours...</p>}
+                {frontKey && !uploading && (
+                  <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Document envoyé.</p>
+                )}
+              </div>
+
+              <div className="verification-upload-box">
+                <label className="settings-label">Document (verso)</label>
+                <input type="file" accept="image/*,.pdf" onChange={(e) => handleFileChange(e, "back")} disabled={uploading} className="u-muted" />
+                {backKey && !uploading && <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Verso envoyé.</p>}
+              </div>
+
+              <div className="verification-upload-box verification-upload-box-wide">
+                <label className="settings-label">Photo claire de votre visage</label>
+                <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, "face")} disabled={uploading} className="u-muted" />
+                {facePhotoKey && !uploading && <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Photo envoyée.</p>}
+              </div>
             </div>
 
-            <div className="u-mb-5">
-              <label className="settings-label">Document (verso)</label>
-              <input type="file" accept="image/*,.pdf" onChange={(e) => handleFileChange(e, "back")} disabled={uploading} className="u-muted" />
-              {backKey && !uploading && <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Verso envoyé et prêt à être soumis.</p>}
-            </div>
-
-            <div className="u-mb-5">
-              <label className="settings-label">Photo claire de votre visage</label>
-              <input type="file" accept="image/*" onChange={(e) => handleFileChange(e, "face")} disabled={uploading} className="u-muted" />
-              {facePhotoKey && !uploading && <p className="settings-hint" style={{ color: "var(--ok)" }}>✓ Photo envoyée et prête à être soumise.</p>}
-            </div>
-
+            {uploadError && <p className="settings-error">{uploadError}</p>}
             {error && <p className="settings-error">{error}</p>}
 
-            <div style={{ display: "flex", gap: 12 }}>
+            <div className="verification-submit-actions">
               <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setStep(2)} disabled={loading}>Retour</button>
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleSubmit} disabled={loading || !locationConsent || !frontKey || !backKey || !facePhotoKey}>
                 {loading ? "Envoi..." : "Soumettre pour vérification"}
@@ -205,8 +220,8 @@ export default function VerificationPage() {
 
         {/* ---------- Étape 4 : Dossier en attente ---------- */}
         {step === 4 && (
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>🟡</div>
+          <div className="verification-success" style={{ textAlign: "center" }}>
+            <div className="verification-success-icon">🟡</div>
             <div className="auth-title">Votre dossier est en cours de vérification</div>
             <p className="auth-sub">
               Notre équipe examine actuellement vos informations. Vous recevrez une notification

@@ -27,6 +27,7 @@ export default async function AdminClientsPage({
 
   const where: Prisma.UserWhereInput = {
     role: { name: "CLIENT" },
+    accountStatus: { not: "CANCELLED" },
     ...(q
       ? {
           OR: [

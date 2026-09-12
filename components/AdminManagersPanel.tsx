@@ -16,6 +16,7 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
   const router = useRouter();
   const toast = useToast();
   const [managers, setManagers] = useState(initialManagers);
+  const [showCreate, setShowCreate] = useState(false);
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
   const [creating, setCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
 
       setManagers((current) => [json.manager!, ...current]);
       setForm({ firstName: "", lastName: "", email: "", password: "" });
+      setShowCreate(false);
       toast.success("Compte manager créé.");
       router.refresh();
     } catch (error) {
@@ -46,12 +48,16 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
   }
 
   async function handleDelete(id: string) {
-    const confirmed = window.confirm("Supprimer ce compte manager ?");
-    if (!confirmed) return;
+    const password = window.prompt("Pour confirmer la suppression, entrez votre mot de passe admin :");
+    if (!password) return;
 
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/admin/managers/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/managers/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
       const json = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) throw new Error(json.error || "Suppression impossible.");
 
@@ -66,61 +72,87 @@ export function AdminManagersPanel({ initialManagers }: { initialManagers: Manag
   }
 
   return (
-    <div style={{ display: "grid", gap: 24 }}>
-      <form onSubmit={handleCreate} style={{ display: "grid", gap: 12, padding: 20, border: "1px solid var(--bo-border)", borderRadius: 12, background: "var(--bo-panel)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h3 style={{ margin: 0 }}>Créer un compte manager</h3>
-        </div>
+    <div style={{ display: "grid", gap: 20 }}>
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button type="button" className="bo-btn bo-btn-primary" onClick={() => setShowCreate((current) => !current)}>
+          {showCreate ? "Fermer" : "+ Ajouter un manager"}
+        </button>
+      </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Prénom</span>
-            <input value={form.firstName} onChange={(e) => setForm((current) => ({ ...current, firstName: e.target.value }))} required style={{ padding: 10, borderRadius: 8, border: "1px solid var(--bo-border)", background: "var(--bo-panel-2)" }} />
-          </label>
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Nom</span>
-            <input value={form.lastName} onChange={(e) => setForm((current) => ({ ...current, lastName: e.target.value }))} required style={{ padding: 10, borderRadius: 8, border: "1px solid var(--bo-border)", background: "var(--bo-panel-2)" }} />
-          </label>
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Email</span>
-            <input type="email" value={form.email} onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))} required style={{ padding: 10, borderRadius: 8, border: "1px solid var(--bo-border)", background: "var(--bo-panel-2)" }} />
-          </label>
-          <label style={{ display: "grid", gap: 6 }}>
-            <span>Mot de passe</span>
-            <input type="password" value={form.password} onChange={(e) => setForm((current) => ({ ...current, password: e.target.value }))} minLength={8} required style={{ padding: 10, borderRadius: 8, border: "1px solid var(--bo-border)", background: "var(--bo-panel-2)" }} />
-          </label>
-        </div>
+      {showCreate && (
+        <form onSubmit={handleCreate} className="bo-panel bo-panel-pad" style={{ display: "grid", gap: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h3 style={{ margin: 0, fontSize: 14, letterSpacing: ".06em", textTransform: "uppercase" }}>Créer un manager</h3>
+          </div>
 
-        <div>
-          <button type="submit" disabled={creating} style={{ padding: "10px 16px", borderRadius: 8, border: "none", background: "var(--volt)", color: "#10241c", fontWeight: 700, cursor: creating ? "wait" : "pointer" }}>
-            {creating ? "Création..." : "Créer le manager"}
-          </button>
-        </div>
-      </form>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span className="settings-label">Prénom</span>
+              <input className="settings-input" value={form.firstName} onChange={(e) => setForm((current) => ({ ...current, firstName: e.target.value }))} required />
+            </label>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span className="settings-label">Nom</span>
+              <input className="settings-input" value={form.lastName} onChange={(e) => setForm((current) => ({ ...current, lastName: e.target.value }))} required />
+            </label>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span className="settings-label">Email</span>
+              <input type="email" className="settings-input" value={form.email} onChange={(e) => setForm((current) => ({ ...current, email: e.target.value }))} required />
+            </label>
+            <label style={{ display: "grid", gap: 6 }}>
+              <span className="settings-label">Mot de passe</span>
+              <input type="password" className="settings-input" value={form.password} onChange={(e) => setForm((current) => ({ ...current, password: e.target.value }))} minLength={8} required />
+            </label>
+          </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button type="submit" disabled={creating} className="bo-btn bo-btn-primary">
+              {creating ? "Création..." : "Ajouter le manager"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="manager-list-grid">
         {managers.length === 0 && <div className="bo-panel bo-panel-pad"><div className="bo-empty">Aucun manager pour le moment.</div></div>}
 
         {managers.map((manager) => (
-          <div key={manager.id} className="bo-section">
-            <div className="bo-section-head" style={{ alignItems: "center" }}>
+          <div key={manager.id} className="manager-card" style={{ display: "grid", gap: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 14 }}>
               <div>
-                <h3 style={{ textTransform: "none", fontSize: 14, color: "var(--bo-text)", fontFamily: "'Manrope'", fontWeight: 700, margin: 0 }}>
-                  {manager.firstName} {manager.lastName}
-                </h3>
-                <span className="mono" style={{ fontSize: 12, color: "var(--bo-muted)" }}>{manager.email}</span>
+                <div className="manager-avatar">{manager.firstName[0]}{manager.lastName[0]}</div>
+                <div style={{ marginTop: 10 }}>
+                  <h3 style={{ textTransform: "none", fontSize: 15, color: "var(--bo-text)", fontFamily: "'Manrope'", fontWeight: 700, margin: 0 }}>
+                    {manager.firstName} {manager.lastName}
+                  </h3>
+                  <span className="mono" style={{ display: "block", marginTop: 4, fontSize: 12, color: "var(--bo-muted)" }}>{manager.email}</span>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => handleDelete(manager.id)}
-                disabled={deletingId === manager.id}
-                style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid rgba(220,38,38,0.4)", background: "rgba(220,38,38,0.1)", color: "#f87171", cursor: deletingId === manager.id ? "wait" : "pointer" }}
-              >
-                {deletingId === manager.id ? "Suppression..." : "Supprimer"}
-              </button>
+
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                <button
+                  type="button"
+                  className="bo-btn bo-btn-sm"
+                  onClick={() => {
+                    const section = document.getElementById(`manager-permissions-${manager.id}`);
+                    section?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }}
+                >
+                  Gérer
+                </button>
+                <button
+                  type="button"
+                  className="bo-btn bo-btn-sm bo-btn-danger"
+                  onClick={() => void handleDelete(manager.id)}
+                  disabled={deletingId === manager.id}
+                >
+                  {deletingId === manager.id ? "Suppression..." : "Supprimer"}
+                </button>
+              </div>
             </div>
-            <div style={{ color: "var(--bo-muted)", fontSize: 12, marginTop: 10 }}>
-              Créé le {new Date(manager.createdAt).toLocaleDateString("fr-FR")}
+
+            <div className="manager-card-meta">
+              <span>Compte manager</span>
+              <strong>{new Date(manager.createdAt).toLocaleDateString("fr-FR")}</strong>
             </div>
           </div>
         ))}
