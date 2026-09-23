@@ -81,11 +81,11 @@ export const authOptions: NextAuthOptions = {
         const email = user.email?.toLowerCase().trim();
         if (!email) return false;
 
-        const existing = await prisma.user.findUnique({ where: { email } });
-        if (!existing) {
+        let dbUser = await prisma.user.findUnique({ where: { email }, include: { role: true } });
+        if (!dbUser) {
           const clientRole = await prisma.role.findUnique({ where: { name: "CLIENT" } });
           if (!clientRole) return false;
-          await prisma.user.create({
+          dbUser = await prisma.user.create({
             data: {
               email,
               firstName: user.name?.split(" ")[0] ?? "Nouveau",
@@ -95,8 +95,14 @@ export const authOptions: NextAuthOptions = {
               providerAccountId: account.providerAccountId,
               verificationStatus: "PROFILE_INCOMPLETE",
             },
+            include: { role: true },
           });
         }
+
+        user.id = dbUser.id;
+        user.name = `${dbUser.firstName} ${dbUser.lastName}`;
+        (user as { role?: string }).role = dbUser.role.name;
+        (user as { verificationStatus?: string }).verificationStatus = dbUser.verificationStatus;
       }
       return true;
     },
