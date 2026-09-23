@@ -4,14 +4,14 @@ function layout(title: string, bodyHtml: string): string {
 <body style="margin:0;padding:0;background:#07060d;font-family:Arial,Helvetica,sans-serif;">
   <div style="max-width:520px;margin:0 auto;padding:36px 20px;">
     <div style="text-align:center;margin-bottom:28px;">
-      <span style="font-size:20px;font-weight:700;letter-spacing:3px;color:#ffffff;">VANTA</span>
+      <span style="font-size:20px;font-weight:700;letter-spacing:3px;color:#ffffff;">MISTER DOU</span>
     </div>
     <div style="background:#100c1e;border:1px solid rgba(150,110,255,.28);border-radius:6px;padding:32px 28px;color:#f3f0ff;">
       <h1 style="font-size:18px;margin:0 0 16px;color:#ffffff;font-weight:600;">${title}</h1>
       ${bodyHtml}
     </div>
     <p style="text-align:center;font-size:11px;color:#655e7d;margin-top:24px;">
-      VANTA — Plateforme de vente de comptes eFootball Mobile
+      MISTER DOU — Plateforme de vente de comptes eFootball Mobile
     </p>
   </div>
 </body>
@@ -30,9 +30,9 @@ const APP_URL = process.env.NEXTAUTH_URL || "https://vanta.app";
 
 export function welcomeEmail(firstName: string) {
   return {
-    subject: "Bienvenue sur VANTA",
+    subject: "Bienvenue sur MISTER DOU",
     html: layout(
-      "Bienvenue dans l'univers VANTA",
+      "Bienvenue dans l'univers MISTER DOU",
       p(`Bonjour ${firstName},`) +
         p("Votre compte a été créé avec succès. Complétez votre profil et faites vérifier votre identité pour débloquer les achats.") +
         button("Compléter mon profil", `${APP_URL}/verification`)
@@ -46,7 +46,7 @@ export function verificationApprovedEmail(firstName: string) {
     html: layout(
       "Identité vérifiée",
       p(`Bonjour ${firstName},`) +
-        p("Votre dossier de vérification a été validé. Vous pouvez désormais acheter sur VANTA.") +
+        p("Votre dossier de vérification a été validé. Vous pouvez désormais acheter sur MISTER DOU.") +
         button("Voir le catalogue", `${APP_URL}/#catalogue`)
     ),
   };
@@ -159,13 +159,13 @@ export function accountReactivatedEmail(firstName: string) {
   };
 }
 
-export function contractCancelledEmail(firstName: string, productTitle: string) {
+export function contractCancelledEmail(firstName: string, productTitle: string, reason?: string | null) {
   return {
     subject: "Votre contrat a été annulé",
     html: layout(
       "Contrat annulé",
       p(`Bonjour ${firstName},`) +
-        p(`Votre achat "${productTitle}" a été annulé suite à un retard de paiement prolongé.`) +
+        p(`Votre achat "${productTitle}" a été annulé${reason ? `. Motif : ${reason}` : ""}.`) +
         button("Contacter le support", `${APP_URL}/messages`)
     ),
   };
@@ -214,10 +214,47 @@ export function passwordResetEmail(firstName: string, resetUrl: string) {
 
 export function newMessageEmail(firstName: string) {
   return {
-    subject: "Nouveau message de l'équipe VANTA",
+    subject: "Nouveau message de l'équipe MISTER DOU",
     html: layout(
       "Nouveau message",
       p(`Bonjour ${firstName},`) + p("Vous avez reçu une réponse à votre message.") + button("Voir la conversation", `${APP_URL}/messages`)
+    ),
+  };
+}
+
+export function adminNewClientEmail(firstName: string, lastName: string, email: string) {
+  return {
+    subject: "Nouveau compte client créé sur MISTER DOU",
+    html: layout(
+      "Nouveau compte client",
+      p(`Un nouveau client vient de créer un compte sur MISTER DOU.`) +
+        p(`<strong>Client :</strong> ${firstName} ${lastName}<br><strong>E-mail :</strong> ${email}`) +
+        button("Voir les clients", `${APP_URL}/admin/clients`)
+    ),
+  };
+}
+
+export function adminDepositDeclaredEmail(
+  firstName: string,
+  lastName: string,
+  email: string,
+  productTitle: string,
+  amount: number,
+  reference?: string | null
+) {
+  return {
+    subject: "Nouvel apport initial à valider sur MISTER DOU",
+    html: layout(
+      "Apport initial à valider",
+      p(`Un client a déclaré un apport initial qui attend votre validation.`) +
+        p(
+          `<strong>Client :</strong> ${firstName} ${lastName}<br>` +
+            `<strong>E-mail :</strong> ${email}<br>` +
+            `<strong>Produit :</strong> ${productTitle}<br>` +
+            `<strong>Montant :</strong> ${amount.toLocaleString("fr-FR")} FCFA<br>` +
+            `<strong>Référence :</strong> ${reference?.trim() || "Non renseignée"}`
+        ) +
+        button("Vérifier l'apport", `${APP_URL}/manager/payments`)
     ),
   };
 }
