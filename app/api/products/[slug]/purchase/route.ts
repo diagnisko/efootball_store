@@ -31,11 +31,6 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
     return NextResponse.json({ error: "Cette offre n'est plus disponible." }, { status: 409 });
   }
 
-  // Note de conception : on verrouille l'offre (passage en IN_PROGRESS) dès la création de
-  // l'achat plutôt que d'attendre la confirmation de l'apport initial par l'admin. Attendre
-  // laisserait une fenêtre pendant laquelle deux clients pourraient réserver la même offre en
-  // parallèle. La confirmation de l'apport initial reste, elle, le déclencheur qui active
-  // réellement le plan de paiement (voir /api/admin/payments/[submissionId]).
   const result = await prisma.$transaction(async (tx) => {
     const stillAvailable = await tx.product.findUnique({ where: { id: product.id } });
     if (!stillAvailable || stillAvailable.status !== "AVAILABLE") {
@@ -62,8 +57,6 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
         status: "PENDING_DEPOSIT",
       },
     });
-
-    await tx.product.update({ where: { id: product.id }, data: { status: "IN_PROGRESS" } });
 
     return { purchase, plan };
   }).catch((e) => {
