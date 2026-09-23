@@ -155,7 +155,9 @@ export async function PATCH(req: Request, { params }: { params: { submissionId: 
         : `Votre apport initial a été confirmé. Votre plan de paiement sur ${plan.installmentsCount} mois est maintenant actif.`;
     } else if (decision === "reject") {
       ops.push(
-        prisma.paymentPlan.update({ where: { id: plan.id }, data: { initialDepositStatus: "REJECTED" } })
+        prisma.paymentPlan.update({ where: { id: plan.id }, data: { initialDepositStatus: "REJECTED", status: "CANCELLED" } }),
+        prisma.purchase.update({ where: { id: purchase.id }, data: { status: "CANCELLED" } }),
+        prisma.product.update({ where: { id: purchase.productId }, data: { status: "AVAILABLE" } })
       );
       notifTitle = "Apport initial refusé";
       notifBody = note ? `Votre apport initial a été refusé. Motif : ${note}` : "Votre apport initial a été refusé.";

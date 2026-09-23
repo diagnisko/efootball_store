@@ -1,4 +1,4 @@
-# VANTA — App Next.js / Prisma
+# MISTER DOU — App Next.js / Prisma
 
 Ce projet fait suite au document d'architecture (`architecture-technique-plateforme.md`) et au
 prototype HTML (`vanta-prototype.html`). Il contient du **vrai code fonctionnel** : le point

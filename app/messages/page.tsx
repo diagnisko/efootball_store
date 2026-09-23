@@ -32,7 +32,7 @@ export default async function MessagesPage() {
       <div className="dash-head">
         <div>
           <h2>Mes messages</h2>
-          <p>Une question sur votre achat ou votre dossier ? Écrivez à l&apos;équipe VANTA.</p>
+          <p>Une question sur votre achat ou votre dossier ? Écrivez à l&apos;équipe MISTER DOU.</p>
         </div>
       </div>
       <MessageThread

@@ -49,7 +49,7 @@ export function BackofficeShell({ role, userName, groups, children }: Props) {
             }
           }}>
             <div className="logo-mark" />
-            <span>VANTA</span>
+            <span>MISTER DOU</span>
           </Link>
           <span className={`bo-role-pill${role === "SUPER_ADMIN" ? " is-admin" : ""}`}>
             {role === "SUPER_ADMIN" ? "Administration" : "Supervision"}

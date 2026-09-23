@@ -42,9 +42,9 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     ...paidSchedules.map((schedule) => `<tr><td>Mois ${schedule.installmentNumber}</td><td>${Number(schedule.amount).toLocaleString("fr-FR")} FCFA</td><td>Payé le ${new Intl.DateTimeFormat("fr-FR").format(schedule.paidAt ?? schedule.dueDate)}</td></tr>`),
   ].join("");
   const date = new Intl.DateTimeFormat("fr-FR", { dateStyle: "long" }).format(new Date());
-  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu VANTA - ${escapeHtml(purchase.product.title)}</title><style>
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Reçu MISTER DOU - ${escapeHtml(purchase.product.title)}</title><style>
     body{font-family:Arial,sans-serif;color:#14231d;max-width:760px;margin:40px auto;padding:0 24px}header{border-bottom:3px solid #c9f269;padding-bottom:18px;margin-bottom:28px}h1{margin:0 0 6px}h2{margin-top:30px;font-size:18px}p{line-height:1.5}.meta{color:#52665c}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid #d7e5dc}th{background:#e7efe9}.total{font-size:20px;font-weight:700;text-align:right;margin-top:24px}.success{padding:14px;background:#eff9d5;border-left:4px solid #8cb83e}@media print{body{margin:0}}
-  </style></head><body><header><h1>VANTA</h1><div class="meta">Reçu de paiement définitif</div></header>
+  </style></head><body><header><h1>MISTER DOU</h1><div class="meta">Reçu de paiement définitif</div></header>
     <p><strong>Client :</strong> ${escapeHtml(`${purchase.user.firstName} ${purchase.user.lastName}`)}<br><strong>E-mail :</strong> ${escapeHtml(purchase.user.email)}<br><strong>Date d'émission :</strong> ${date}</p>
     <h2>Achat</h2><p><strong>${escapeHtml(purchase.product.title)}</strong><br>Mode : ${plan.paymentMode === "ONE_TIME" ? "Paiement comptant" : `Paiement en ${plan.installmentsCount} mois`}</p>
     <h2>Détail des paiements</h2><table><thead><tr><th>Élément</th><th>Montant</th><th>État</th></tr></thead><tbody>${rows}</tbody></table>
@@ -54,7 +54,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   return new NextResponse(html, {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Content-Disposition": `attachment; filename="recu-vanta-${purchase.id}.html"`,
+      "Content-Disposition": `attachment; filename="recu-mister-dou-${purchase.id}.html"`,
     },
   });
 }

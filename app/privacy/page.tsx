@@ -1,6 +1,6 @@
 import { IconAlertTriangle } from "@/components/Icons";
 
-export const metadata = { title: "Politique de confidentialité — VANTA" };
+export const metadata = { title: "Politique de confidentialité — MISTER DOU" };
 
 export default function PrivacyPage() {
   return (
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
       <div className="panel card" style={{ borderColor: "var(--warn)", marginBottom: 22 }}>
         <p style={{ fontSize: 13, color: "var(--muted)", display: "flex", gap: 8, alignItems: "flex-start" }}>
           <IconAlertTriangle style={{ flexShrink: 0, marginTop: 3, color: "var(--warn)" }} />
-          Brouillon générique destiné uniquement à éviter un lien mort. VANTA collecte des
+          Brouillon générique destiné uniquement à éviter un lien mort. MISTER DOU collecte des
           documents d&apos;identité et des preuves de paiement — cela impose des obligations
           légales réelles (RGPD ou équivalent local selon votre juridiction). Faites rédiger une
           vraie politique de confidentialité avant tout lancement réel.

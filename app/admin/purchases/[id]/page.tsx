@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { AccessInfoManager } from "@/components/AccessInfoManager";
+import { CancelContractButton } from "@/components/CancelContractButton";
 
 export default async function AdminPurchaseDetailPage({ params }: { params: { id: string } }) {
   const purchase = await prisma.purchase.findUnique({
@@ -32,6 +33,7 @@ export default async function AdminPurchaseDetailPage({ params }: { params: { id
             {purchase.user.firstName} {purchase.user.lastName} — <span className="mono">{purchase.user.email}</span>
           </p>
         </div>
+        {purchase.status !== "CANCELLED" && <CancelContractButton purchaseId={purchase.id} />}
       </div>
 
       {purchase.paymentPlan && schedules.length > 0 && (

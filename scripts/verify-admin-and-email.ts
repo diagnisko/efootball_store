@@ -30,7 +30,7 @@ async function main() {
     const created = await prisma.user.create({
       data: {
         firstName: "Admin",
-        lastName: "VANTA",
+        lastName: "MISTER DOU",
         email,
         passwordHash,
         roleId: superAdminRole.id,
@@ -49,8 +49,8 @@ async function main() {
 
   const emailResult = await sendEmail({
     to: email,
-    subject: "Test email VANTA",
-    html: "<p>Test email VANTA OK.</p>",
+    subject: "Test email MISTER DOU",
+    html: "<p>Test email MISTER DOU OK.</p>",
   });
 
   console.log("EMAIL_RESULT", emailResult);

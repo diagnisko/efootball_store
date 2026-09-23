@@ -40,7 +40,7 @@ export function ClientNotesPanel({ clientId, notes }: { clientId: string; notes:
     <div className="bo-panel bo-panel-pad">
       <h3>Notes internes</h3>
       <p style={{ fontSize: 11, color: "var(--bo-muted-2)", marginBottom: 14 }}>
-        Visibles uniquement par l&apos;équipe VANTA — jamais par le client.
+        Visibles uniquement par l&apos;équipe MISTER DOU — jamais par le client.
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>

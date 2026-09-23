@@ -72,7 +72,7 @@ export default async function DashboardPage() {
       <div className="dash-head">
         <div>
           <h2>Bonjour, {user.firstName} 👋</h2>
-          <p>Voici l&apos;état de votre dossier VANTA aujourd&apos;hui.</p>
+          <p>Voici l&apos;état de votre dossier MISTER DOU aujourd&apos;hui.</p>
         </div>
       </div>
 
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
               <div>
                 <span className="access-eyebrow">Accès client</span>
                 <h3>Votre compte et votre code</h3>
-                <p className="u-muted-sm">Retrouvez ici les identifiants remis par VANTA et demandez un nouveau code à tout moment.</p>
+                <p className="u-muted-sm">Retrouvez ici les identifiants remis par MISTER DOU et demandez un nouveau code à tout moment.</p>
               </div>
               <span className={`badge ${accessInfo.length > 0 ? "badge-ok" : "badge-warn"}`}>
                 {accessInfo.length > 0 ? "Accès disponible" : "En attente"}

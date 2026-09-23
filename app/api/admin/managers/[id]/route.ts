@@ -36,10 +36,26 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   }
 
   await prisma.$transaction(async (tx) => {
+    // Preserve business history by transferring required manager-owned records
+    // to the Super Admin performing the deletion.
+    await tx.product.updateMany({ where: { createdBy: manager.id }, data: { createdBy: actorId } });
+    await tx.paymentConfirmation.updateMany({ where: { reviewedBy: manager.id }, data: { reviewedBy: actorId } });
+    await tx.accessInformation.updateMany({ where: { createdBy: manager.id }, data: { createdBy: actorId } });
+    await tx.clientNote.updateMany({ where: { authorId: manager.id }, data: { authorId: actorId } });
+    await tx.adminLog.updateMany({ where: { actorId: manager.id }, data: { actorId } });
+
+    await tx.identityDocument.updateMany({ where: { reviewedBy: manager.id }, data: { reviewedBy: null } });
+    await tx.verificationRequest.updateMany({ where: { reviewedBy: manager.id }, data: { reviewedBy: null } });
+    await tx.conversation.updateMany({ where: { assignedTo: manager.id }, data: { assignedTo: null } });
+    await tx.latePaymentRule.updateMany({ where: { updatedBy: manager.id }, data: { updatedBy: null } });
+    await tx.platformSetting.updateMany({ where: { updatedBy: manager.id }, data: { updatedBy: null } });
+    await tx.managerPermission.updateMany({ where: { grantedBy: manager.id }, data: { grantedBy: null } });
+
     await tx.notification.deleteMany({ where: { userId: manager.id } });
     await tx.managerPermission.deleteMany({ where: { userId: manager.id } });
     await tx.message.deleteMany({ where: { senderId: manager.id } });
     await tx.verificationCodeRequest.deleteMany({ where: { OR: [{ requestedBy: manager.id }, { providedBy: manager.id }] } });
+    await tx.passwordResetToken.deleteMany({ where: { userId: manager.id } });
     await tx.user.delete({ where: { id: manager.id } });
   });
 

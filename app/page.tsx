@@ -2,16 +2,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getPlatformStatsCached, formatMemberCount } from "@/lib/stats";
 import { getPublicCatalogCached } from "@/lib/catalog";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { IconArrowRight } from "@/components/Icons";
 import { getHomepageHeroImageCached } from "@/lib/site-settings";
-
-const STATUS_LABEL: Record<string, { label: string; className: string }> = {
-  AVAILABLE: { label: "Disponible", className: "badge-ok" },
-  IN_PROGRESS: { label: "En cours", className: "badge-warn" },
-  SOLD: { label: "Vendu", className: "badge-muted" },
-  HIDDEN: { label: "Masqué", className: "badge-muted" },
-};
+import { getProductStatusLabel } from "@/lib/product-status";
 
 export default async function LandingPage() {
   const session = await getServerSession(authOptions);
@@ -22,6 +17,15 @@ export default async function LandingPage() {
     getPublicCatalogCached(),
     getHomepageHeroImageCached(),
   ]);
+
+  const myPurchases = isLoggedIn
+    ? await prisma.purchase.findMany({
+        where: { userId: (session?.user as { id: string }).id, productId: { in: products.map((product) => product.id) } },
+        include: { paymentPlan: { select: { initialDepositStatus: true, status: true } } },
+        orderBy: { createdAt: "desc" },
+      })
+    : [];
+  const myPurchaseByProduct = new Map(myPurchases.map((purchase) => [purchase.productId, purchase]));
 
   const getLandingThumbnail = (product: (typeof products)[number]) => {
     const imageMedia = product.media.find((m) => m.mediaType !== "VIDEO") ?? null;
@@ -42,7 +46,7 @@ export default async function LandingPage() {
               <p className="u-muted">Aucune offre publiée pour le moment. Revenez bientôt.</p>
             )}
             {products.map((p) => {
-              const status = STATUS_LABEL[p.status] ?? STATUS_LABEL.AVAILABLE;
+              const status = getProductStatusLabel(p.status, myPurchaseByProduct.get(p.id));
               const features = (p.features as { ovr?: number; platform?: string }) ?? {};
               const thumbnail = getLandingThumbnail(p);
               return (
@@ -110,7 +114,7 @@ export default async function LandingPage() {
               className={`hero-visual-image${heroImageUrl ? " has-product-image" : ""}`}
               style={heroImageUrl ? { backgroundImage: `linear-gradient(180deg, rgba(10,12,12,.08), rgba(10,12,12,.48)), url("${heroImageUrl}")` } : undefined}
             >
-              <div className="visual-badge">VANTA · accompagnement vérifié</div>
+              <div className="visual-badge">MISTER DOU · accompagnement vérifié</div>
               <div className="visual-card-info">
                 <span>Une expérience claire</span>
                 <strong>Choisis ton compte en confiance.</strong>
@@ -172,7 +176,7 @@ export default async function LandingPage() {
 
         <div className="catalogue-grid landing-grid">
           {products.map((p) => {
-            const status = STATUS_LABEL[p.status] ?? STATUS_LABEL.AVAILABLE;
+            const status = getProductStatusLabel(p.status, myPurchaseByProduct.get(p.id));
             const features = (p.features as { ovr?: number; platform?: string }) ?? {};
             const priceTotal = Number(p.priceTotal);
             const initial = Number(p.initialDepositAmount);

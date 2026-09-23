@@ -111,10 +111,10 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as { role?: string }).role;
         token.verificationStatus = (user as { verificationStatus?: string }).verificationStatus;
       }
-      if (!token.role && token.email) {
-        // Rafraîchit le rôle/statut à chaque token existant (ex: connexion OAuth)
+      if (token.sub || token.email) {
+        // Le statut peut changer après la connexion quand un admin valide le dossier.
         const dbUser = await prisma.user.findUnique({
-          where: { email: token.email as string },
+          where: token.sub ? { id: token.sub } : { email: token.email as string },
           include: { role: true },
         });
         if (dbUser) {

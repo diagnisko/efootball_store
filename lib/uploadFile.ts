@@ -13,12 +13,13 @@ export interface PresignedUploadResult {
  */
 export async function uploadFileViaPresignedPost(
   presignEndpoint: string,
-  file: File
+  file: File,
+  presignPayload: Record<string, string> = {}
 ): Promise<PresignedUploadResult> {
   const presignRes = await fetch(presignEndpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ fileName: file.name, contentType: file.type }),
+    body: JSON.stringify({ fileName: file.name, contentType: file.type, ...presignPayload }),
   });
 
   const presignData = await presignRes.json().catch(() => ({}));

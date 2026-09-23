@@ -13,7 +13,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { unstable_cache } from "next/cache";
 
 export const metadata: Metadata = {
-  title: "VANTA — Comptes eFootball vérifiés",
+  title: "MISTER DOU — Comptes eFootball vérifiés",
   description: "Plateforme premium de vente de comptes eFootball Mobile avec paiement échelonné.",
   manifest: "/manifest.webmanifest",
   icons: {
@@ -64,7 +64,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <nav>
             <Link href="/" className="logo">
               <div className="logo-mark" />
-              <div className="logo-text">VANTA</div>
+              <div className="logo-text">MISTER DOU</div>
             </Link>
             <div className="nav-links">
               <Link href="/">Accueil</Link>

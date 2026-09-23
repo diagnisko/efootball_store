@@ -4,15 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { PurchaseButton } from "@/components/PurchaseButton";
 import { ProductGallery } from "@/components/ProductGallery";
-
 export const dynamic = "force-dynamic"; // le statut d'une offre change souvent, jamais de cache
-
-const STATUS_LABEL: Record<string, { label: string; className: string }> = {
-  AVAILABLE: { label: "Disponible", className: "badge-ok" },
-  IN_PROGRESS: { label: "En cours de paiement", className: "badge-warn" },
-  SOLD: { label: "Vendu", className: "badge-muted" },
-  HIDDEN: { label: "Masqué", className: "badge-muted" },
-};
+import { getProductStatusLabel } from "@/lib/product-status";
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const product = await prisma.product.findUnique({
@@ -34,7 +27,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       })
     : null;
 
-  const status = STATUS_LABEL[product.status] ?? STATUS_LABEL.AVAILABLE;
+  const status = getProductStatusLabel(product.status, myPurchase);
   const features = (product.features as { ovr?: number; platform?: string; coins?: number; division?: number }) ?? {};
   const remaining = Number(product.priceTotal) - Number(product.initialDepositAmount);
   const monthly = Math.round(remaining / product.installmentsCount);

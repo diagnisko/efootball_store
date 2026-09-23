@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'VANTA',
-    short_name: 'VANTA',
+    name: 'MISTER DOU',
+    short_name: 'MISTER DOU',
     start_url: '/',
     display: 'standalone',
     background_color: '#081d17',

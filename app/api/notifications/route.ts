@@ -28,7 +28,21 @@ export async function PATCH(req: Request) {
   if (!session?.user) return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
 
   const userId = (session.user as { id: string }).id;
-  const body = (await req.json().catch(() => ({}))) as { ids?: string[]; markRead?: boolean };
+  const body = (await req.json().catch(() => ({}))) as {
+    ids?: string[];
+    markRead?: boolean;
+    markAllRead?: boolean;
+  };
+
+  if (body.markAllRead) {
+    await prisma.notification.updateMany({
+      where: { userId, isRead: false },
+      data: { isRead: true },
+    });
+
+    return NextResponse.json({ ok: true });
+  }
+
   const ids = Array.isArray(body.ids) ? body.ids.filter(Boolean) : [];
 
   if (!ids.length) {

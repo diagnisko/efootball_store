@@ -8,17 +8,19 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>("dark");
 
   useEffect(() => {
-    const stored = window.localStorage.getItem("vanta-theme");
+    const stored =
+      window.localStorage.getItem("mister-dou-theme") ?? window.localStorage.getItem("vanta-theme");
     const nextTheme: Theme = stored === "light" ? "light" : "dark";
     setTheme(nextTheme);
     document.documentElement.dataset.theme = nextTheme;
+    window.localStorage.setItem("mister-dou-theme", nextTheme);
   }, []);
 
   function toggleTheme() {
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
     document.documentElement.dataset.theme = nextTheme;
-    window.localStorage.setItem("vanta-theme", nextTheme);
+    window.localStorage.setItem("mister-dou-theme", nextTheme);
   }
 
   return (

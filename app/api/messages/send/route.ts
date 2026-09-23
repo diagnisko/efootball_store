@@ -73,7 +73,7 @@ export async function POST(req: Request) {
       data: {
         userId: conversation.clientId,
         type: "new_message",
-        title: "Nouveau message de l'équipe VANTA",
+        title: "Nouveau message de l'équipe MISTER DOU",
         body: "Vous avez reçu une réponse à votre message.",
         link: "/messages",
       },

@@ -49,7 +49,7 @@ export default function RegisterPage() {
   return (
     <div className="auth-wrap">
       <div className="panel auth-card">
-        <div className="auth-title">Bienvenue dans l&apos;univers VANTA</div>
+        <div className="auth-title">Bienvenue dans l&apos;univers MISTER DOU</div>
         <div className="auth-sub">Créez votre compte pour découvrir les offres.</div>
 
         <form onSubmit={handleSubmit}>

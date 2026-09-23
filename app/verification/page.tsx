@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { uploadFileViaPresignedPost } from "@/lib/uploadFile";
 
 const STEP_LABELS = ["Bienvenue", "Profil", "Vérification", "Dossier"];
 
@@ -33,12 +34,7 @@ export default function VerificationPage() {
     setUploading(true);
     setUploadError(null);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("slot", slot);
-      const response = await fetch("/api/uploads/identity-document", { method: "POST", body: formData });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || "Échec de l'upload.");
+      const result = await uploadFileViaPresignedPost("/api/uploads/identity-document", file, { slot });
       if (slot === "front") setFrontKey(result.key);
       if (slot === "back") setBackKey(result.key);
       if (slot === "face") setFacePhotoKey(result.key);
@@ -91,8 +87,8 @@ export default function VerificationPage() {
         {step === 1 && (
           <>
             <div className="verification-hero">
-              <div className="verification-hero-badge">VANTA</div>
-              <div className="auth-title">Bienvenue dans l&apos;univers VANTA{firstName ? `, ${firstName}` : ""}</div>
+              <div className="verification-hero-badge">MISTER DOU</div>
+              <div className="auth-title">Bienvenue dans l&apos;univers MISTER DOU{firstName ? `, ${firstName}` : ""}</div>
             </div>
             <div className="auth-sub">
               Avant de pouvoir acheter un compte, deux étapes simples : complétez votre profil,
@@ -150,7 +146,7 @@ export default function VerificationPage() {
               <strong>Vos documents restent confidentiels.</strong>
               <span>
                 Ils sont stockés dans un espace privé et ne sont accessibles qu&apos;aux membres
-                autorisés de VANTA pour vérifier votre dossier. Ils ne sont pas publiés ni partagés
+                autorisés de MISTER DOU pour vérifier votre dossier. Ils ne sont pas publiés ni partagés
                 avec d&apos;autres utilisateurs.
               </span>
             </div>
@@ -161,7 +157,7 @@ export default function VerificationPage() {
                 checked={locationConsent}
                 onChange={(e) => setLocationConsent(e.target.checked)}
               />
-              <span>J&apos;accepte de partager ma localisation avec VANTA pour sécuriser la remise de l&apos;article. Cette autorisation est enregistrée avec mon dossier.</span>
+              <span>J&apos;accepte de partager ma localisation avec MISTER DOU pour sécuriser la remise de l&apos;article. Cette autorisation est enregistrée avec mon dossier.</span>
             </label>
 
             <div className="u-mb-4">

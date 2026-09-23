@@ -80,7 +80,7 @@ export function HeroImageSettings({ initialUrl }: { initialUrl: string | null })
         {message && <p className="settings-hint">{message}</p>}
       </div>
       <div className="hero-settings-preview">
-        {url ? <img src={url} alt="Aperçu de la couverture d'accueil" /> : <span>Fond VANTA par défaut</span>}
+        {url ? <img src={url} alt="Aperçu de la couverture d'accueil" /> : <span>Fond MISTER DOU par défaut</span>}
       </div>
     </div>
   );

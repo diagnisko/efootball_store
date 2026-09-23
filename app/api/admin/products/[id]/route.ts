@@ -7,6 +7,7 @@ import { requireCapability } from "@/lib/permissions";
 import { logAdminAction } from "@/lib/admin-log";
 import { slugify } from "@/lib/slugify";
 import type { Prisma } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 interface MediaInput {
   mediaType: "IMAGE" | "VIDEO" | "THUMBNAIL";
@@ -128,24 +129,85 @@ export async function DELETE(_req: Request, { params }: { params: { id: string }
     return NextResponse.json({ error: "Permission refusée." }, { status: 403 });
   }
 
+  const { password } = (await _req.json().catch(() => ({}))) as { password?: string };
+  if (!password) {
+    return NextResponse.json({ error: "Mot de passe administrateur requis." }, { status: 400 });
+  }
+  const actor = await prisma.user.findUnique({ where: { id: actorId }, select: { passwordHash: true } });
+  if (!actor?.passwordHash || !(await bcrypt.compare(password, actor.passwordHash))) {
+    return NextResponse.json({ error: "Mot de passe administrateur incorrect." }, { status: 403 });
+  }
+
   const existing = await prisma.product.findUnique({ where: { id: params.id } });
   if (!existing) return NextResponse.json({ error: "Offre introuvable." }, { status: 404 });
 
-  const purchaseCount = await prisma.purchase.count({ where: { productId: existing.id } });
-  if (purchaseCount > 0) {
+  const validPurchaseCount = await prisma.purchase.count({
+    where: {
+      productId: existing.id,
+      status: { in: ["ACTIVE", "COMPLETED"] },
+      paymentPlan: { initialDepositStatus: "PAID" },
+    },
+  });
+  if (validPurchaseCount > 0) {
     return NextResponse.json(
       {
         error:
-          "Cette offre a un historique d'achats et ne peut pas être supprimée. Masquez-la plutôt.",
+          "Cette offre a un achat validé et ne peut pas être supprimée. Masquez-la plutôt.",
       },
       { status: 409 }
     );
   }
 
-  await prisma.$transaction([
-    prisma.productMedia.deleteMany({ where: { productId: existing.id } }),
-    prisma.product.delete({ where: { id: existing.id } }),
-  ]);
+  await prisma.$transaction(async (tx) => {
+    const purchases = await tx.purchase.findMany({
+      where: { productId: existing.id },
+      select: { id: true },
+    });
+    const purchaseIds = purchases.map((purchase) => purchase.id);
+
+    if (purchaseIds.length > 0) {
+      await tx.verificationCodeRequest.deleteMany({ where: { purchaseId: { in: purchaseIds } } });
+      await tx.accessInformation.deleteMany({ where: { purchaseId: { in: purchaseIds } } });
+    }
+
+    const plans = await tx.paymentPlan.findMany({
+      where: { purchaseId: { in: purchaseIds } },
+      select: { id: true },
+    });
+    const planIds = plans.map((plan) => plan.id);
+    const schedules = await tx.paymentSchedule.findMany({
+      where: { paymentPlanId: { in: planIds } },
+      select: { id: true },
+    });
+    const scheduleIds = schedules.map((schedule) => schedule.id);
+
+    if (planIds.length > 0 || scheduleIds.length > 0) {
+      const submissions = await tx.paymentSubmission.findMany({
+        where: {
+          OR: [
+            ...(planIds.length > 0 ? [{ paymentPlanId: { in: planIds } }] : []),
+            ...(scheduleIds.length > 0 ? [{ paymentScheduleId: { in: scheduleIds } }] : []),
+          ],
+        },
+        select: { id: true },
+      });
+      const submissionIds = submissions.map((submission) => submission.id);
+      if (submissionIds.length > 0) {
+        await tx.paymentConfirmation.deleteMany({ where: { paymentSubmissionId: { in: submissionIds } } });
+        await tx.paymentSubmission.deleteMany({ where: { id: { in: submissionIds } } });
+      }
+      if (planIds.length > 0) {
+        await tx.paymentSchedule.deleteMany({ where: { paymentPlanId: { in: planIds } } });
+        await tx.paymentPlan.deleteMany({ where: { id: { in: planIds } } });
+      }
+    }
+
+    if (purchaseIds.length > 0) {
+      await tx.purchase.deleteMany({ where: { id: { in: purchaseIds } } });
+    }
+    await tx.productMedia.deleteMany({ where: { productId: existing.id } });
+    await tx.product.delete({ where: { id: existing.id } });
+  });
 
   await logAdminAction({
     actorId,

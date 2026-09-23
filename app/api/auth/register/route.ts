@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     data: {
       userId: user.id,
       type: "welcome",
-      title: "Bienvenue sur VANTA",
+      title: "Bienvenue sur MISTER DOU",
       body: "Complétez votre profil et vérifiez votre identité pour débloquer les achats.",
     },
   });

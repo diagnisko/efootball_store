@@ -95,6 +95,21 @@ export function NotificationQuickAccess() {
     setSelectedIds((current) => current.filter((id) => !ids.includes(id)));
   };
 
+  const markAllNotificationsRead = async () => {
+    if (!unreadCount) return;
+
+    const previousNotifications = notifications;
+    setNotifications((current) => current.map((item) => ({ ...item, isRead: true })));
+
+    const response = await fetch("/api/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ markAllRead: true }),
+    });
+
+    if (!response.ok) setNotifications(previousNotifications);
+  };
+
   const deleteSelectedNotifications = async () => {
     if (!selectedIds.length) return;
     await fetch("/api/notifications", {
@@ -122,7 +137,11 @@ export function NotificationQuickAccess() {
         <button
           className="notification-trigger"
           type="button"
-          onClick={() => setOpen((current) => !current)}
+          onClick={() => {
+            const willOpen = !open;
+            setOpen(willOpen);
+            if (willOpen) void markAllNotificationsRead();
+          }}
           aria-label={`${unreadCount} notification${unreadCount > 1 ? "s" : ""} non lue${unreadCount > 1 ? "s" : ""}`}
           title="Notifications"
         >
@@ -160,6 +179,7 @@ export function NotificationQuickAccess() {
                         checked={selectedIds.includes(notification.id)}
                         onChange={() => toggleSelection(notification.id)}
                       />
+                      <span className="notification-select-label">Choisir</span>
                     </label>
                   )}
                   <span className="notification-entry-dot">{!notification.isRead && <IconAlertTriangle />}</span>

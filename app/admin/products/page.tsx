@@ -14,7 +14,18 @@ const STATUS_LABEL: Record<string, { label: string; className: string }> = {
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { purchases: true } } },
+    include: {
+      _count: {
+        select: {
+          purchases: {
+            where: {
+              status: { in: ["ACTIVE", "COMPLETED"] },
+              paymentPlan: { initialDepositStatus: "PAID" },
+            },
+          },
+        },
+      },
+    },
   });
 
   return (

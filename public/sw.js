@@ -10,7 +10,7 @@ self.addEventListener('push', (event) => {
   if (!event.data) return;
 
   const payload = event.data.json && event.data.json();
-  const title = payload?.title || 'VANTA';
+  const title = payload?.title || 'MISTER DOU';
   const body = payload?.body || 'Vous avez une nouvelle notification.';
   const url = payload?.url || '/';
 
@@ -19,7 +19,7 @@ self.addEventListener('push', (event) => {
       body,
       icon: '/icon-192.png',
       badge: '/icon.svg',
-      tag: 'vanta-notification',
+      tag: 'mister-dou-notification',
       data: { url },
       vibrate: [100, 50, 100],
     })
